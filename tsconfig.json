@@ -5,7 +5,7 @@
     "outDir": "build",
     "target": "esnext",
     "lib": ["dom"],
-    "module": "esnext",
+    "module": "nodenext",
     "moduleResolution": "nodenext",
     "inlineSources": true,
     "experimentalDecorators": true

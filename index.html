@@ -5,11 +5,47 @@
   <meta charset="utf-8">
   <title>Prototype</title>
   <link rel="stylesheet" href="style/app.css">
+
+  <template id="flashing-dots">
+    <link rel="stylesheet" href="style/flashing_dots.css" />
+    <div class="flashing-dots"></div>
+  </template>
+
+  <template id="chat-box">
+    <link rel="stylesheet" href="style/chat_box.css" />
+    <ul class="messages"></ul>
+    <flashing-dots class="flashing-dots"></flashing-dots>
+    <form class="chat">
+      <textarea class="query" rows="4" placeholder="Chat with me"></textarea>
+    </form>
+  </template>
+
+  <template id="chat-box-my-message">
+    <link rel="stylesheet" href="style/chat_box.css" />
+    <li class="message-entry my-message">
+      <div class="sender"></div>
+      <div class="message"></div>
+    </li>
+  </template>
+
+  <template id="chat-box-their-message">
+    <link rel="stylesheet" href="style/chat_box.css" />
+    <li class="message-entry their-message">
+      <div class="sender"></div>
+      <div class="message"></div>
+    </li>
+  </template>
+
   <script type="module" src="src/app.ts" defer></script>
 </head>
 
 <body>
-  <div class="welcome"></div>
+  <div class="scoll-down-container">
+    <div class="main-view">
+      <h1>Welcome!</h1>
+      <chat-box class="chat-box"></chat-box>
+    </div>
+  </div>
 </body>
 
 </html>

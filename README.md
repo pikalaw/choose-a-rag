@@ -11,6 +11,7 @@ npm i -D gts
 npx gts init
 npm i -D parcel
 
+npm i rxjs
 npm i showdown
 npm i -D @types/showdown
 npm i vector-storage
@@ -37,7 +38,7 @@ Change these in `tsconfig.json`:
     "outDir": "build",
     "target": "esnext",
     "lib": ["dom"],
-    "module": "esnext",
+    "module": "nodenext",
     "moduleResolution": "nodenext",
     "inlineSources": true,
     "experimentalDecorators": true,
