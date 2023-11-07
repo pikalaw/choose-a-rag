@@ -1,0 +1,32 @@
+{
+  "name": "chatgpt-assistant",
+  "version": "1.0.0",
+  "description": "## Setup",
+  "source": "index.html",
+  "type": "module",
+  "scripts": {
+    "start": "npx parcel -p 8000",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "gts lint",
+    "clean": "gts clean",
+    "compile": "tsc",
+    "fix": "gts fix",
+    "prepare": "npm run compile",
+    "pretest": "npm run compile",
+    "posttest": "npm run lint"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/node": "20.8.2",
+    "@types/showdown": "^2.0.4",
+    "gts": "^5.2.0",
+    "parcel": "^2.10.2",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "openai": "^4.16.1",
+    "showdown": "^2.1.0",
+    "vector-storage": "^1.0.55"
+  }
+}

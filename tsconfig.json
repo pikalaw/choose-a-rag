@@ -1,0 +1,15 @@
+{
+  "extends": "./node_modules/gts/tsconfig-google.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "build",
+    "target": "esnext",
+    "lib": ["dom"],
+    "module": "esnext",
+    "moduleResolution": "nodenext",
+    "inlineSources": true,
+    "experimentalDecorators": true
+  },
+  "include": ["src/**/*.ts", "test/**/*.ts"],
+  "exclude": ["node_modules"]
+}
