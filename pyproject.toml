@@ -1,0 +1,6 @@
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+strict = true
+files = [
+    "api/**/*.py",
+]

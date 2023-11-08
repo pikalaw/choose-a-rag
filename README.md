@@ -1,6 +1,6 @@
 # chatgpt-assistant
 
-## Setup
+## Client-side setup
 
 ```bash
 npm init
@@ -15,7 +15,6 @@ npm i rxjs
 npm i showdown
 npm i -D @types/showdown
 npm i vector-storage
-npm i openai
 ```
 
 Add these to `package.json`:
@@ -49,3 +48,16 @@ Change these in `tsconfig.json`:
 
 Rename `.prettierrc.js` to `.prettierrc.cjs`, because Prettier cannot import
 ESM.
+
+## Server-side setup
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+
+# mypy.
+python3 -m pip install mypy
+
+# FastAPI.
+python3 -m pip install "fastapi[all]" "uvicorn[standard]" httpx
+```
