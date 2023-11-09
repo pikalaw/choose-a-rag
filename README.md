@@ -53,7 +53,7 @@ ESM.
 
 ```bash
 poetry init
-poetry add "fastapi[all]" "uvicorn[standard]" httpx
+poetry add "fastapi[all]" "uvicorn[standard]" httpx pydantic
 poetry add git+https://github.com/pikalaw/llama_index.git#managed_index
 poetry add  https://storage.googleapis.com/genai-testing-temp/ai-generativelanguage-v1beta-py.tar.gz
 poetry add -D mypy
