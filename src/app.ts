@@ -1,6 +1,7 @@
 import './chat_box.js';
 import {ChatBox, QueryEvent, queryEventName} from './chat_box.js';
 import {getElement} from './common/view_model.js';
+import {getWelcome} from './api.js';
 
 const welcomeMessage = 'How can I help?';
 
@@ -12,7 +13,8 @@ chatBox.addEventListener(queryEventName, async event => {
   chatBox.turnFlashingDots('visible');
 
   const query = (event as CustomEvent<QueryEvent>).detail.text;
-  window.alert(`got ${query}`);
+  const welcome = await getWelcome();
+  window.alert(`got ${query}. server response: ${welcome}`);
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
   chatBox.turnFlashingDots('hidden');

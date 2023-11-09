@@ -52,12 +52,9 @@ ESM.
 ## Server-side setup
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
-
-# mypy.
-python3 -m pip install mypy
-
-# FastAPI.
-python3 -m pip install "fastapi[all]" "uvicorn[standard]" httpx
+poetry init
+poetry add "fastapi[all]" "uvicorn[standard]" httpx
+poetry add git+https://github.com/pikalaw/llama_index.git#managed_index
+poetry add  https://storage.googleapis.com/genai-testing-temp/ai-generativelanguage-v1beta-py.tar.gz
+poetry add -D mypy
 ```

@@ -4,3 +4,25 @@ strict = true
 files = [
     "api/**/*.py",
 ]
+
+[tool.poetry]
+name = "chatgpt-assistant"
+version = "0.1.0"
+description = ""
+authors = ["Lawrence Tsang <pikalaw@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.11, <3.12"
+httpx = "^0.25.1"
+fastapi = {extras = ["all"], version = "^0.104.1"}
+uvicorn = {extras = ["standard"], version = "^0.24.0.post1"}
+llama-index = {git = "https://github.com/pikalaw/llama_index.git", rev = "managed_index"}
+google-ai-generativelanguage = {url = "https://storage.googleapis.com/genai-testing-temp/ai-generativelanguage-v1beta-py.tar.gz"}
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.6.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
