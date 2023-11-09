@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from openai._types import FileContent
 from pydantic import BaseModel
 from typing import Iterable
 
@@ -10,9 +11,19 @@ class AttributedAnswer(BaseModel):
 
 class BaseRag(BaseModel, ABC):
   @abstractmethod
-  async def add_pdf(self, filename: str, content: bytes) -> None:
+  async def add_file(
+      self, *, filename: str, content: FileContent, content_type: str
+  ) -> None:
     ...
 
   @abstractmethod
-  async def ask_question(self, question: str) -> Iterable[AttributedAnswer]:
+  async def clear_files(self) -> None:
+    ...
+
+  @abstractmethod
+  async def add_conversation(self, message: str) -> Iterable[AttributedAnswer]:
+    ...
+
+  @abstractmethod
+  async def clear_conversation(self) -> None:
     ...

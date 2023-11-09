@@ -3,7 +3,7 @@ import logging
 from openai import AsyncOpenAI
 from openai.types.beta import Assistant, Thread
 from openai.types.beta.threads import MessageContentText
-from openai._types import NOT_GIVEN, NotGiven
+from openai._types import FileContent, NOT_GIVEN, NotGiven
 from pydantic import PrivateAttr
 from typing import Iterable, List
 from .base_rag import AttributedAnswer, BaseRag
@@ -19,6 +19,7 @@ class OpenaiRag(BaseRag):
   _after: str | NotGiven = PrivateAttr(NOT_GIVEN)
 
   def __init__(self, client: AsyncOpenAI, assistant: Assistant, thread: Thread) -> None:
+    super().__init__()
     self._client = client
     self._assistant = assistant
     self._thread = thread
@@ -38,56 +39,84 @@ class OpenaiRag(BaseRag):
     thread = await client.beta.threads.create()
     return cls(client, assistant, thread)
 
-  async def add_pdf(self, filename: str, content: bytes) -> None:
+  @classmethod
+  async def get(cls, assistant_id: str = "asst_4It75FJXgCNPyLn5I4nul0LG") -> "OpenaiRag":
+    client = AsyncOpenAI()
+    assistant = await client.beta.assistants.retrieve(assistant_id)
+    thread = await client.beta.threads.create()
+    return cls(client, assistant, thread)
+
+  async def add_file(
+      self, *, filename: str, content: FileContent, content_type: str
+  ) -> None:
     new_file = await self._client.files.create(
-      file=(filename, content, "application/pdf"),
+      file=(filename, content, content_type),
       purpose='assistants'
     )
     new_file = await self._client.files.wait_for_processing(new_file.id)
+
     self._assistant = await self._client.beta.assistants.update(
       self._assistant.id,
       file_ids=self._assistant.file_ids + [new_file.id]
     )
 
-  async def ask_question(self, question: str) -> Iterable[AttributedAnswer]:
+  async def clear_files(self) -> None:
+    for file_id in self._assistant.file_ids:
+      await self._client.files.delete(file_id)
+
+    self._assistant = await self._client.beta.assistants.update(
+      self._assistant.id,
+      file_ids=[],
+    )
+
+  async def add_conversation(self, message: str) -> Iterable[AttributedAnswer]:
     await self._client.beta.threads.messages.create(
         thread_id=self._thread.id,
         role="user",
-        content=question)
+        content=message)
 
     await self._run_thread()
     return await self._get_new_messages()
 
+  async def clear_conversation(self) -> None:
+    # Don't actually delete the thread for future reference.
+    self._thread = await self._client.beta.threads.create()
+
   async def _run_thread(self) -> None:
+    run = await self._client.beta.threads.runs.create(
+        thread_id=self._thread.id,
+        assistant_id=self._assistant.id)
     while True:
-      run = await self._client.beta.threads.runs.create(
-          thread_id=self._thread.id,
-          assistant_id=self._assistant.id)
       match run.status:
         case "queued" | "in_progress":
           await asyncio.sleep(1) 
         case "failed" | "expired":
           raise RuntimeError(run.last_error)
         case "completed":
-          break
+          return
         case "requires_action" | "cancelling" | "cancelled" | _:
           raise NotImplementedError(f"Run state {run.status} not supported")
+      run = await self._client.beta.threads.runs.retrieve(
+          run.id,
+          thread_id=self._thread.id)
 
   async def _get_new_messages(self) -> Iterable[AttributedAnswer]:
     attributed_answers: List[AttributedAnswer] = []
     async for message in self._client.beta.threads.messages.list(
         thread_id=self._thread.id,
         after=self._after,
+        order="asc",
     ):
-      assert message.role == "assistant"
+      if message.role != 'assistant':
+        continue
       for content in message.content:
         if not isinstance(content, MessageContentText):
           _logger.warn(f"Content unexpected: {content}")
           continue
         attributed_answers.append(
           AttributedAnswer(
-              answer = content.text.value,
-              citations = [str(annotation)
+              answer=content.text.value,
+              citations=[str(annotation)
                            for annotation in content.text.annotations],
           )
         )
