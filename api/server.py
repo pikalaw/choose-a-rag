@@ -41,14 +41,17 @@ async def openai_new() -> None:
   openai = await OpenaiRag.get()
 
 
-@app.post('/openai/add_file')
-async def openai_add_file(file: UploadFile) -> None:
+@app.post('/openai/add_files')
+async def openai_add_file(files: List[UploadFile]) -> None:
   if openai is None:
     raise RuntimeError("OpenAI assistant hasn't loaded yet")
-  assert file.filename is not None
-  assert file.content_type is not None
-  await openai.add_file(
-      filename=file.filename, content=file.file, content_type=file.content_type)
+  for file in files:
+    assert file.filename is not None
+    assert file.content_type is not None
+    await openai.add_file(
+        filename=file.filename,
+        content=file.file,
+        content_type=file.content_type)
 
 
 @app.post('/openai/clear-files')

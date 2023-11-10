@@ -36,6 +36,11 @@
     </li>
   </template>
 
+  <template id="file-upload">
+    <label for="files">Files:</label>
+    <input name="files" id="files" type="file" multiple>
+  </template>
+
   <script type="module" src="src/app.ts" defer></script>
 </head>
 
@@ -44,6 +49,8 @@
     <div class="main-view">
       <h1>Welcome!</h1>
       <chat-box class="chat-box"></chat-box>
+      <file-upload class="file-upload" url="http://localhost:8001/openai/add_files">
+      </file-upload>
     </div>
   </div>
 </body>

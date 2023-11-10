@@ -7,9 +7,12 @@ from openai._types import FileContent, NOT_GIVEN, NotGiven
 from pydantic import PrivateAttr
 from typing import Iterable, List
 from .base_rag import AttributedAnswer, BaseRag
+from .debugging import pretty
 
 
 _logger = logging.getLogger(__name__)
+_logger.setLevel(logging.INFO)
+_logger.addHandler(logging.StreamHandler())
 
 
 class OpenaiRag(BaseRag):
@@ -87,6 +90,7 @@ class OpenaiRag(BaseRag):
         thread_id=self._thread.id,
         assistant_id=self._assistant.id)
     while True:
+      _logger.info(pretty(run))
       match run.status:
         case "queued" | "in_progress":
           await asyncio.sleep(1) 
@@ -109,6 +113,7 @@ class OpenaiRag(BaseRag):
     ):
       if message.role != 'assistant':
         continue
+      _logger.info(pretty(message))
       for content in message.content:
         if not isinstance(content, MessageContentText):
           _logger.warn(f"Content unexpected: {content}")
