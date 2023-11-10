@@ -12,6 +12,12 @@
 }
 
 .host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.host h3 {
   flex: 1;
 }
 

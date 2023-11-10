@@ -21,6 +21,9 @@ llama-index = {git = "https://github.com/pikalaw/llama_index.git", rev = "manage
 google-ai-generativelanguage = {url = "https://storage.googleapis.com/genai-testing-temp/ai-generativelanguage-v1beta-py.tar.gz"}
 pydantic = "^2.4.2"
 openai = "^1.2.0"
+llama-hub = "^0.0.43"
+unstructured = {extras = ["all-docs"], version = "^0.10.29"}
+torch = ">=2.0.0, !=2.0.1, !=2.1.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.6.1"

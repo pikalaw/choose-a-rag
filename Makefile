@@ -31,5 +31,8 @@ update-env-client:
 update-env-server:
 	python3 -m pip install -r requirements.txt --upgrade
 
+kill-client:
+	fuser -k 8000/tcp
+
 kill-server:
 	fuser -k 8001/tcp

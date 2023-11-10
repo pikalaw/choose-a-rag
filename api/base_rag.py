@@ -7,6 +7,7 @@ from typing import Iterable
 class AttributedAnswer(BaseModel):
   answer: str
   citations: Iterable[str] | None = None
+  score: float | None = None
 
 
 class BaseRag(BaseModel, ABC):
