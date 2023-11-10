@@ -44,13 +44,21 @@ fileUpload.addEventListener(fileUploadEventName, async event => {
   if (status === 'uploading') {
     chatBox.turnQueryBox('disabled', 'Ingesting files...');
     chatBox.turnFlashingDots('visible');
+    updateFileList([]);
   } else {
     chatBox.turnQueryBox('enabled', welcomeMessage);
     chatBox.turnFlashingDots('hidden');
+    updateFileList(await api.openaiListFiles());
   }
 });
 
+function updateFileList(filenames: string[]) {
+  const div = getElement<HTMLElement>('.file-list', {from: document});
+  div.innerHTML = filenames.map(fn => `<li>${fn}</li>`).join('\n');
+}
+
 async function start() {
   await api.openaiGet();
+  updateFileList(await api.openaiListFiles());
 }
 start();

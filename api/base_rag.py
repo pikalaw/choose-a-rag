@@ -11,6 +11,10 @@ class AttributedAnswer(BaseModel):
 
 class BaseRag(BaseModel, ABC):
   @abstractmethod
+  async def list_files(self) -> Iterable[str]:
+    ...
+
+  @abstractmethod
   async def add_file(
       self, *, filename: str, content: FileContent, content_type: str
   ) -> None:

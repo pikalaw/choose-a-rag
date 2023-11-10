@@ -37,7 +37,7 @@
   </template>
 
   <template id="file-upload">
-    <label for="files">Files:</label>
+    <label for="files">New files:</label>
     <input name="files" id="files" type="file" multiple>
   </template>
 
@@ -51,6 +51,10 @@
       <chat-box class="chat-box"></chat-box>
       <file-upload class="file-upload" url="http://localhost:8001/openai/add_files">
       </file-upload>
+      <div>
+        Loaded files:
+        <ol class="file-list"></ol>
+      </div>
     </div>
   </div>
 </body>

@@ -10,6 +10,13 @@ export async function openaiGet(): Promise<void> {
   });
 }
 
+export async function openaiListFiles(): Promise<string[]> {
+  const response = await fetch('http://localhost:8001/openai/list-files', {
+    method: 'GET',
+  });
+  return await response.json();
+}
+
 export async function openaiClearFiles(): Promise<void> {
   await fetch('http://localhost:8001/openai/clear-files', {
     method: 'POST',

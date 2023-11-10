@@ -49,6 +49,13 @@ class OpenaiRag(BaseRag):
     thread = await client.beta.threads.create()
     return cls(client, assistant, thread)
 
+  async def list_files(self) -> Iterable[str]:
+    filenames: List[str] = []
+    async for file in self._client.files.list():
+      if file.id in self._assistant.file_ids:
+        filenames.append(file.filename)
+    return filenames
+
   async def add_file(
       self, *, filename: str, content: FileContent, content_type: str
   ) -> None:
