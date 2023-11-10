@@ -30,8 +30,8 @@ export class ChatBox extends HTMLElement {
     });
   }
 
-  turnFlashingDots(mode: 'visible' | 'hidden') {
-    const dots = getElement('.flashing-dots', {from: this});
+  turnFlashingDots({host, mode}: {host: string; mode: 'visible' | 'hidden'}) {
+    const dots = getElement(`.host.${host} .flashing-dots`, {from: this});
     dots.style.visibility = mode;
   }
 
@@ -46,7 +46,15 @@ export class ChatBox extends HTMLElement {
     }
   }
 
-  addMyMessage({sender, message}: {sender: string; message: string}) {
+  addMyMessage({
+    host,
+    sender,
+    message,
+  }: {
+    host: string;
+    sender: string;
+    message: string;
+  }) {
     const li = document.createElement(
       'chat-box-my-message'
     ) as ChatBoxMyMessage;
@@ -54,11 +62,19 @@ export class ChatBox extends HTMLElement {
     li.sender = sender;
     li.message = message;
 
-    const ul = getElement('.messages', {from: this});
+    const ul = getElement(`.host.${host} .messages`, {from: this});
     ul.appendChild(li);
   }
 
-  addTheirMessage({sender, message}: {sender: string; message: string}) {
+  addTheirMessage({
+    host,
+    sender,
+    message,
+  }: {
+    host: string;
+    sender: string;
+    message: string;
+  }) {
     const li = document.createElement(
       'chat-box-their-message'
     ) as ChatBoxTheirMessage;
@@ -66,7 +82,7 @@ export class ChatBox extends HTMLElement {
     li.sender = sender;
     li.message = message;
 
-    const ul = getElement('.messages', {from: this});
+    const ul = getElement(`.host.${host} .messages`, {from: this});
     ul.appendChild(li);
   }
 }

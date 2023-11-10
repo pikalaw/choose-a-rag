@@ -13,8 +13,18 @@
 
   <template id="chat-box">
     <link rel="stylesheet" href="style/chat_box.css" />
-    <ul class="messages"></ul>
-    <flashing-dots class="flashing-dots"></flashing-dots>
+    <div class="hosts">
+      <div class="host openai">
+        <h3>OpenAI</h3>
+        <ul class="messages"></ul>
+        <flashing-dots class="flashing-dots"></flashing-dots>
+      </div>
+      <div class="host google">
+        <h3>Google</h3>
+        <ul class="messages google"></ul>
+        <flashing-dots class="flashing-dots"></flashing-dots>
+      </div>
+    </div>
     <form class="chat">
       <textarea class="query" rows="4" placeholder="Chat with me"></textarea>
     </form>
@@ -51,9 +61,15 @@
       <chat-box class="chat-box"></chat-box>
       <file-upload class="file-upload" url="http://localhost:8001/openai/add_files">
       </file-upload>
-      <div>
-        Loaded files:
-        <ol class="file-list"></ol>
+      <div class="loaded-files-section">
+        <div class="loaded-files-subsection">
+          Loaded files at OpenAI:
+          <ol class="file-list openai"></ol>
+        </div>
+        <div class="loaded-files-subsection">
+          Loaded files at Google:
+          <ol class="file-list google"></ol>
+        </div>
       </div>
     </div>
   </div>

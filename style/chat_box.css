@@ -5,11 +5,23 @@
   gap: .3em;
 }
 
+.hosts {
+  display: flex;
+  gap: .5em;
+  justify-content: space-between;
+}
+
+.host {
+  flex: 1;
+}
+
 .messages {
   align-items: stretch;
   display: flex;
   flex-direction: column;
+  list-style: none;
   margin: 0;
+  padding-left: 0;
 }
 
 .message p {
