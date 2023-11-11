@@ -5,12 +5,14 @@ import * as api from './api.js';
 
 const welcomeMessage = 'How can I help?';
 const GOOGLE = 'google';
+const LLAMA = 'llama';
 const OPENAI = 'openai';
 
 const chatBox = getElement<ChatBox>('.chat-box', {from: document});
 
 chatBox.turnQueryBox('enabled', welcomeMessage);
 chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
+chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
 chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
 
 chatBox.addEventListener(queryEventName, async event => {
@@ -39,14 +41,18 @@ async function queryGoogle(query: string): Promise<void> {
         sender: 'Google',
         message: answer.answer,
       });
-      if (answer.citations !== undefined && answer.citations.length > 0) {
+      if (
+        answer.citations !== undefined &&
+        answer.citations !== null &&
+        answer.citations.length > 0
+      ) {
         chatBox.addTheirMessage({
           host: GOOGLE,
           sender: 'Citations',
           message: answer.citations.map(c => `* ${c}`).join('\n'),
         });
       }
-      if (answer.score !== undefined) {
+      if (answer.score !== undefined && answer.score !== null) {
         chatBox.addTheirMessage({
           host: GOOGLE,
           sender: 'Answerability score',
@@ -75,11 +81,22 @@ async function queryOpenai(query: string): Promise<void> {
         sender: 'OpenAI',
         message: answer.answer,
       });
-      if (answer.citations?.length ?? 0 > 0) {
+      if (
+        answer.citations !== undefined &&
+        answer.citations !== null &&
+        answer.citations.length > 0
+      ) {
         chatBox.addTheirMessage({
           host: OPENAI,
           sender: 'Citations',
-          message: answer.citations?.join('\n') ?? '-',
+          message: answer.citations.join('\n'),
+        });
+      }
+      if (answer.score !== undefined && answer.score !== null) {
+        chatBox.addTheirMessage({
+          host: OPENAI,
+          sender: 'Answerability score',
+          message: String(answer.score),
         });
       }
     }

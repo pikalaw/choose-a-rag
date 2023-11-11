@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from typing import List
 from .base_rag import AttributedAnswer
 from .google_rag import GoogleRag
+from .llama_rag import LlamaRag
 from .openai_rag import OpenaiRag
 
 
@@ -88,7 +89,7 @@ async def openai_clear_conversation() -> None:
   await openai.clear_conversation()
 
 
-# openai
+# google
 google: GoogleRag | None
 
 
@@ -138,3 +139,28 @@ async def google_clear_conversation() -> None:
   if google is None:
     raise RuntimeError("Google assistant hasn't loaded yet")
   await google.clear_conversation()
+
+
+# google+llama
+llama: LlamaRag | None
+
+
+@app.post('/llama/new')
+async def llama_new() -> None:
+  global llama
+  # Try to reuse an existing one.
+  llama = await LlamaRag.get()
+
+
+@app.post('/llama/add-conversation')
+async def llama_add_conversation(message: UserMessage) -> List[AttributedAnswer]:
+  if llama is None:
+    raise RuntimeError("llama assistant hasn't loaded yet")
+  return list(await llama.add_conversation(message.text))
+
+
+@app.post('/llama/clear-conversation')
+async def llama_clear_conversation() -> None:
+  if llama is None:
+    raise RuntimeError("llama assistant hasn't loaded yet")
+  await llama.clear_conversation()

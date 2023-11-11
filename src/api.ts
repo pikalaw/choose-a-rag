@@ -121,3 +121,30 @@ export async function googleClearConversation(): Promise<void> {
     method: 'POST',
   });
 }
+
+// google+llama
+export async function llamaGet(): Promise<void> {
+  await fetch('http://localhost:8001/llama/new', {
+    method: 'POST',
+  });
+}
+
+export async function llamaAddConversation(
+  message: string
+): Promise<AttributedAnswer[]> {
+  const response = await fetch('http://localhost:8001/llama/add-conversation', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({text: message}),
+  });
+  const answers: AttributedAnswer[] = await response.json();
+  return answers;
+}
+
+export async function llamaClearConversation(): Promise<void> {
+  await fetch('http://localhost:8001/llama/clear-conversation', {
+    method: 'POST',
+  });
+}

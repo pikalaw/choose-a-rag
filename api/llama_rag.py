@@ -13,6 +13,7 @@ from typing import Iterable, List, Literal
 from unstructured.partition.auto import partition  # type: ignore
 import uuid
 from .base_rag import AttributedAnswer, BaseRag
+from .llms import PaLM
 
 
 _logger = logging.getLogger(__name__)
@@ -25,9 +26,10 @@ class ConversationMessage(BaseModel):
   message: AttributedAnswer
 
 
-class GoogleRag(BaseRag):
+class LlamaRag(BaseRag):
   _client: GoogleIndex = PrivateAttr()
   _query_engine: BaseQueryEngine = PrivateAttr()
+  _palm: PaLM = PrivateAttr()
 
   conversation: List[ConversationMessage] = []
 
@@ -35,31 +37,32 @@ class GoogleRag(BaseRag):
     super().__init__()
     self._client = client
     self._query_engine = client.as_query_engine()
+    self._palm = PaLM()
 
   @classmethod
-  async def create(cls, *, corpus_id: str, display_name: str) -> "GoogleRag":
+  async def create(cls, *, corpus_id: str, display_name: str) -> "LlamaRag":
     return await asyncio.to_thread(
         lambda: cls._create(
             corpus_id=corpus_id, display_name=display_name))
 
   @classmethod
-  def _create(cls, *, corpus_id: str, display_name: str) -> "GoogleRag":
+  def _create(cls, *, corpus_id: str, display_name: str) -> "LlamaRag":
     return cls(GoogleIndex.create_corpus(
         corpus_id=corpus_id, display_name=display_name))
 
   @classmethod
   async def get(
       cls, *, corpus_id: str = "ltsang-rag-comparision"
-  ) -> "GoogleRag":
+  ) -> "LlamaRag":
     return await asyncio.to_thread(lambda: cls._get(corpus_id=corpus_id))
 
   @classmethod
-  def _get(cls, *, corpus_id: str) -> "GoogleRag":
+  def _get(cls, *, corpus_id: str) -> "LlamaRag":
     try:
       return cls(GoogleIndex.from_corpus(corpus_id=corpus_id))
     except Exception as e:
       _logger.warning(f"Cannot find corpus {corpus_id}: {e}. Creating it.")
-      return GoogleRag._create(
+      return LlamaRag._create(
           corpus_id=corpus_id, display_name="RAG comparision corpus")
 
   async def list_files(self) -> Iterable[str]:
