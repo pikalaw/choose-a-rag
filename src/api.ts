@@ -7,6 +7,7 @@ export async function getWelcome(): Promise<string> {
 export interface AttributedAnswer {
   answer: string;
   citations?: string[];
+  score?: number;
 }
 
 // openai

@@ -34,3 +34,11 @@ body {
 .loaded-files-subsection {
   flex: 1;
 }
+
+.file-control {
+  display: flex;
+}
+
+.space-filler {
+  flex: 1;
+}

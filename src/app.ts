@@ -39,11 +39,18 @@ async function queryGoogle(query: string): Promise<void> {
         sender: 'Google',
         message: answer.answer,
       });
-      if (answer.citations?.length ?? 0 > 0) {
+      if (answer.citations !== undefined && answer.citations.length > 0) {
         chatBox.addTheirMessage({
           host: GOOGLE,
           sender: 'Citations',
-          message: answer.citations?.join('\n') ?? '-',
+          message: answer.citations.map(c => `* ${c}`).join('\n'),
+        });
+      }
+      if (answer.score !== undefined) {
+        chatBox.addTheirMessage({
+          host: GOOGLE,
+          sender: 'Answerability score',
+          message: String(answer.score),
         });
       }
     }
@@ -121,6 +128,29 @@ function updateFileList({
 }) {
   const div = getElement<HTMLElement>(`.file-list.${host}`, {from: document});
   div.innerHTML = filenames.map(fn => `<li>${fn}</li>`).join('\n');
+}
+
+const deleteFilesButton = getElement<HTMLInputElement>('.delete-files-button', {
+  from: document,
+});
+deleteFilesButton.addEventListener('click', async () => {
+  chatBox.turnQueryBox('disabled', 'Clearing files...');
+  await Promise.all([googleClearFiles(), openaiClearFiles()]);
+  chatBox.turnQueryBox('enabled', welcomeMessage);
+});
+
+async function googleClearFiles() {
+  chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
+  await api.googleClearFiles();
+  updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+  chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
+}
+
+async function openaiClearFiles() {
+  chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
+  await api.openaiClearFiles();
+  updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
+  chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
 }
 
 async function startAll() {
