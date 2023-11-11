@@ -23,6 +23,19 @@ export async function openaiListFiles(): Promise<string[]> {
   return await response.json();
 }
 
+export async function openaiAddFiles(files: FileList): Promise<void> {
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    formData.append('files', file, file.name);
+  }
+
+  await fetch('http://localhost:8001/openai/add-files', {
+    method: 'POST',
+    body: formData,
+  });
+}
+
 export async function openaiClearFiles(): Promise<void> {
   await fetch('http://localhost:8001/openai/clear-files', {
     method: 'POST',
@@ -64,6 +77,19 @@ export async function googleListFiles(): Promise<string[]> {
     method: 'GET',
   });
   return await response.json();
+}
+
+export async function googleAddFiles(files: FileList): Promise<void> {
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    formData.append('files', file, file.name);
+  }
+
+  await fetch('http://localhost:8001/google/add-files', {
+    method: 'POST',
+    body: formData,
+  });
 }
 
 export async function googleClearFiles(): Promise<void> {

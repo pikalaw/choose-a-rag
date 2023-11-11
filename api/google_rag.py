@@ -2,14 +2,17 @@ import asyncio
 import llama_index.vector_stores.google.generativeai.genai_extension as genaix
 from llama_index.indices.managed.google.generativeai import GoogleIndex
 from llama_index.indices.query.base import BaseQueryEngine
-from llama_index.response.schema import Response
+from llama_index.response.schema import PydanticResponse
+from llama_index.response_synthesizers.google.generativeai import SynthesizedResponse
 from llama_index.schema import NodeRelationship, NodeWithScore, RelatedNodeInfo, TextNode
 import logging
 import math
 from openai._types import FileContent
-from typing import IO, Iterable, List, Literal
 from pydantic import BaseModel, PrivateAttr
+from tempfile import SpooledTemporaryFile
+from typing import Iterable, List, Literal
 from unstructured.partition.auto import partition  # type: ignore
+import uuid
 from .base_rag import AttributedAnswer, BaseRag
 
 
@@ -78,11 +81,13 @@ class GoogleRag(BaseRag):
   def _add_file(
       self, *, filename: str, content: FileContent, content_type: str
   ) -> None:
-    assert type(content) is IO[bytes]
-    elements = partition(filename=filename, file=content, content_type=content_type)
+    assert isinstance(content, SpooledTemporaryFile)
+    elements = partition(
+        file=content,
+        content_type=content_type)
     text_chunks = [" ".join(str(el).split()) for el in elements]
 
-    doc_id = str(hash(filename))
+    doc_id = str(uuid.uuid4())
     self._client.insert_nodes(
         [
             TextNode(
@@ -110,13 +115,15 @@ class GoogleRag(BaseRag):
     return await asyncio.to_thread(lambda: self._add_conversation(message))
 
   def _add_conversation(self, message: str) -> Iterable[AttributedAnswer]:
-    response = self._query_engine.query(message)
-    assert isinstance(response, Response)
+    wrapper_response = self._query_engine.query(message)
+    assert isinstance(wrapper_response, PydanticResponse)
+    response = wrapper_response.response
+    assert isinstance(response, SynthesizedResponse)
 
     assistant_message = AttributedAnswer(
-        answer=response.response or '',
-        citations=[node.text for node in response.source_nodes],
-        score=_max_score(response.source_nodes),
+        answer=response.answer or '',
+        citations=response.attributed_passages,
+        score=response.answerable_probability,
     )
 
     self.conversation.extend([
@@ -136,8 +143,3 @@ class GoogleRag(BaseRag):
 
   async def clear_conversation(self) -> None:
     self.conversation = []
-
-
-def _max_score(nodes: List[NodeWithScore]) -> float | None:
-  score = max([-math.inf] + [node.score or -math.inf for node in nodes])
-  return score if score > -math.inf else None

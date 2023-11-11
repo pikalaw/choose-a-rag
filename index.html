@@ -59,8 +59,10 @@
     <div class="main-view">
       <h1>Who's the better RAG?</h1>
       <chat-box class="chat-box"></chat-box>
-      <file-upload class="file-upload" url="http://localhost:8001/openai/add_files">
-      </file-upload>
+      <div>
+        <label for="files">New files:</label>
+        <input name="files" id="files" type="file" multiple>
+      </div>
       <div class="loaded-files-section">
         <div class="loaded-files-subsection">
           Loaded files at OpenAI:

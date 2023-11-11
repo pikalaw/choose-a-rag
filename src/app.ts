@@ -1,12 +1,6 @@
 import './chat_box.js';
-import './file_upload.js';
 import {ChatBox, QueryEvent, queryEventName} from './chat_box.js';
 import {getElement} from './common/view_model.js';
-import {
-  FileUpload,
-  FileUploadEvent,
-  fileUploadEventName,
-} from './file_upload.js';
 import * as api from './api.js';
 
 const welcomeMessage = 'How can I help?';
@@ -24,17 +18,17 @@ chatBox.addEventListener(queryEventName, async event => {
 
   const query = (event as CustomEvent<QueryEvent>).detail.text;
   if (query.startsWith('<')) {
-    await processOpenai(query.slice(1));
+    await queryOpenai(query.slice(1));
   } else if (query.startsWith('>')) {
-    await processGoogle(query.slice(1));
+    await queryGoogle(query.slice(1));
   } else {
-    await Promise.all([processGoogle(query), processOpenai(query)]);
+    await Promise.all([queryGoogle(query), queryOpenai(query)]);
   }
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
 });
 
-async function processGoogle(query: string): Promise<void> {
+async function queryGoogle(query: string): Promise<void> {
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
   chatBox.addMyMessage({host: GOOGLE, sender: 'User', message: query});
   try {
@@ -63,7 +57,7 @@ async function processGoogle(query: string): Promise<void> {
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
 }
 
-async function processOpenai(query: string): Promise<void> {
+async function queryOpenai(query: string): Promise<void> {
   chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
   chatBox.addMyMessage({host: OPENAI, sender: 'User', message: query});
   try {
@@ -92,29 +86,61 @@ async function processOpenai(query: string): Promise<void> {
   chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
 }
 
-const fileUpload = getElement<FileUpload>('.file-upload', {from: document});
-fileUpload.addEventListener(fileUploadEventName, async event => {
-  const status = (event as CustomEvent<FileUploadEvent>).detail.status;
-  if (status === 'uploading') {
-    chatBox.turnQueryBox('disabled', 'Ingesting files...');
-    chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
-    updateFileList([]);
-  } else {
-    chatBox.turnQueryBox('enabled', welcomeMessage);
-    chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
-    updateFileList(await api.openaiListFiles());
+const fileUpload = getElement<HTMLInputElement>('#files', {from: document});
+fileUpload.addEventListener('change', async () => {
+  chatBox.turnQueryBox('disabled', 'Ingesting files...');
+
+  const files = fileUpload.files;
+  if (files !== null) {
+    await Promise.all([googleFileUpload(files), openaiFileUpload(files)]);
   }
+
+  chatBox.turnQueryBox('enabled', welcomeMessage);
 });
 
-function updateFileList(filenames: string[]) {
-  const div = getElement<HTMLElement>('.file-list', {from: document});
+async function googleFileUpload(files: FileList): Promise<void> {
+  chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
+  await api.googleAddFiles(files);
+  updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+  chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
+}
+
+async function openaiFileUpload(files: FileList): Promise<void> {
+  chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
+  await api.openaiAddFiles(files);
+  updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
+  chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
+}
+
+function updateFileList({
+  host,
+  filenames,
+}: {
+  host: string;
+  filenames: string[];
+}) {
+  const div = getElement<HTMLElement>(`.file-list.${host}`, {from: document});
   div.innerHTML = filenames.map(fn => `<li>${fn}</li>`).join('\n');
 }
 
-async function start() {
+async function startAll() {
   chatBox.turnQueryBox('disabled', 'Starting...');
-  Promise.all([api.googleGet(), api.openaiGet()]);
-  updateFileList(await api.openaiListFiles());
+  await Promise.all([startGoogle(), startOpenai()]);
   chatBox.turnQueryBox('enabled', welcomeMessage);
 }
-start();
+
+async function startGoogle() {
+  chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
+  await api.googleGet();
+  updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+  chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
+}
+
+async function startOpenai() {
+  chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
+  await api.openaiGet();
+  updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
+  chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
+}
+
+startAll();
