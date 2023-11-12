@@ -2,8 +2,7 @@ import asyncio
 import llama_index.vector_stores.google.generativeai.genai_extension as genaix
 from llama_index.indices.managed.google.generativeai import GoogleIndex
 from llama_index.indices.query.base import BaseQueryEngine
-from llama_index.response.schema import PydanticResponse
-from llama_index.response_synthesizers.google.generativeai import SynthesizedResponse
+from llama_index.response.schema import Response
 from llama_index.schema import NodeRelationship, RelatedNodeInfo, TextNode
 import logging
 from openai._types import FileContent
@@ -49,7 +48,7 @@ class GoogleRag(BaseRag):
 
   @classmethod
   async def get(
-      cls, *, corpus_id: str = "ltsang-rag-comparision"
+      cls, *, corpus_id: str = "ltsang-google"
   ) -> "GoogleRag":
     return await asyncio.to_thread(lambda: cls._get(corpus_id=corpus_id))
 
@@ -60,7 +59,8 @@ class GoogleRag(BaseRag):
     except Exception as e:
       _logger.warning(f"Cannot find corpus {corpus_id}: {e}. Creating it.")
       return GoogleRag._create(
-          corpus_id=corpus_id, display_name="RAG comparision corpus")
+          corpus_id=corpus_id,
+          display_name="RAG comparision with plain Google")
 
   async def list_files(self) -> Iterable[str]:
     return await asyncio.to_thread(lambda: self._list_files())
@@ -114,15 +114,14 @@ class GoogleRag(BaseRag):
     return await asyncio.to_thread(lambda: self._add_conversation(message))
 
   def _add_conversation(self, message: str) -> Iterable[AttributedAnswer]:
-    wrapper_response = self._query_engine.query(message)
-    assert isinstance(wrapper_response, PydanticResponse)
-    response = wrapper_response.response
-    assert isinstance(response, SynthesizedResponse)
+    response = self._query_engine.query(message)
+    assert isinstance(response, Response)
 
     assistant_message = AttributedAnswer(
-        answer=response.answer or '',
-        citations=response.attributed_passages,
-        score=response.answerable_probability,
+        answer=response.response or '',
+        citations=[node.text
+                   for node in response.source_nodes if node.score is None],
+        score=_get_answerable_probability(response),
     )
 
     self.conversation.extend([
@@ -142,3 +141,12 @@ class GoogleRag(BaseRag):
 
   async def clear_conversation(self) -> None:
     self.conversation = []
+
+
+def _get_answerable_probability(response: Response) -> float | None:
+  if response.metadata is None:
+    return None
+  value = response.metadata.get("answerable_probability", None)
+  if value is None:
+    return None
+  return float(value)

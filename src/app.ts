@@ -21,10 +21,16 @@ chatBox.addEventListener(queryEventName, async event => {
   const query = (event as CustomEvent<QueryEvent>).detail.text;
   if (query.startsWith('<')) {
     await queryOpenai(query.slice(1));
-  } else if (query.startsWith('>')) {
+  } else if (query.startsWith('^')) {
     await queryGoogle(query.slice(1));
+  } else if (query.startsWith('>')) {
+    await queryLlama(query.slice(1));
   } else {
-    await Promise.all([queryGoogle(query), queryOpenai(query)]);
+    await Promise.all([
+      queryGoogle(query),
+      queryLlama(query),
+      queryOpenai(query),
+    ]);
   }
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
@@ -68,6 +74,46 @@ async function queryGoogle(query: string): Promise<void> {
     });
   }
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
+}
+
+async function queryLlama(query: string): Promise<void> {
+  chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
+  chatBox.addMyMessage({host: LLAMA, sender: 'User', message: query});
+  try {
+    const answers = await api.llamaAddConversation(query);
+    for (const answer of answers) {
+      chatBox.addTheirMessage({
+        host: LLAMA,
+        sender: 'Google+LlamaIndex',
+        message: answer.answer,
+      });
+      if (
+        answer.citations !== undefined &&
+        answer.citations !== null &&
+        answer.citations.length > 0
+      ) {
+        chatBox.addTheirMessage({
+          host: LLAMA,
+          sender: 'Citations',
+          message: answer.citations.map(c => `* ${c}`).join('\n'),
+        });
+      }
+      if (answer.score !== undefined && answer.score !== null) {
+        chatBox.addTheirMessage({
+          host: LLAMA,
+          sender: 'Answerability score',
+          message: String(answer.score),
+        });
+      }
+    }
+  } catch (error) {
+    chatBox.addTheirMessage({
+      host: LLAMA,
+      sender: 'SYSTEM',
+      message: String(error),
+    });
+  }
+  chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
 }
 
 async function queryOpenai(query: string): Promise<void> {
@@ -116,7 +162,11 @@ fileUpload.addEventListener('change', async () => {
 
   const files = fileUpload.files;
   if (files !== null) {
-    await Promise.all([googleFileUpload(files), openaiFileUpload(files)]);
+    await Promise.all([
+      googleFileUpload(files),
+      llamaFileUpload(files),
+      openaiFileUpload(files),
+    ]);
   }
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
@@ -127,6 +177,13 @@ async function googleFileUpload(files: FileList): Promise<void> {
   await api.googleAddFiles(files);
   updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
+}
+
+async function llamaFileUpload(files: FileList): Promise<void> {
+  chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
+  await api.llamaAddFiles(files);
+  updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
+  chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
 }
 
 async function openaiFileUpload(files: FileList): Promise<void> {
@@ -152,7 +209,11 @@ const deleteFilesButton = getElement<HTMLInputElement>('.delete-files-button', {
 });
 deleteFilesButton.addEventListener('click', async () => {
   chatBox.turnQueryBox('disabled', 'Clearing files...');
-  await Promise.all([googleClearFiles(), openaiClearFiles()]);
+  await Promise.all([
+    googleClearFiles(),
+    llamaClearFiles(),
+    openaiClearFiles(),
+  ]);
   chatBox.turnQueryBox('enabled', welcomeMessage);
 });
 
@@ -161,6 +222,13 @@ async function googleClearFiles() {
   await api.googleClearFiles();
   updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
+}
+
+async function llamaClearFiles() {
+  chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
+  await api.llamaClearFiles();
+  updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
+  chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
 }
 
 async function openaiClearFiles() {
@@ -172,7 +240,7 @@ async function openaiClearFiles() {
 
 async function startAll() {
   chatBox.turnQueryBox('disabled', 'Starting...');
-  await Promise.all([startGoogle(), startOpenai()]);
+  await Promise.all([startGoogle(), startLlama(), startOpenai()]);
   chatBox.turnQueryBox('enabled', welcomeMessage);
 }
 
@@ -181,6 +249,13 @@ async function startGoogle() {
   await api.googleGet();
   updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
+}
+
+async function startLlama() {
+  chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
+  await api.llamaGet();
+  updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
+  chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
 }
 
 async function startOpenai() {

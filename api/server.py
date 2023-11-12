@@ -152,6 +152,33 @@ async def llama_new() -> None:
   llama = await LlamaRag.get()
 
 
+@app.get('/llama/list-files')
+async def llama_list_file() -> List[str]:
+  if llama is None:
+    raise RuntimeError("llama assistant hasn't loaded yet")
+  return list(await llama.list_files())
+
+
+@app.post('/llama/add-files')
+async def llama_add_file(files: List[UploadFile]) -> None:
+  if llama is None:
+    raise RuntimeError("llama assistant hasn't loaded yet")
+  for file in files:
+    assert file.filename is not None
+    assert file.content_type is not None
+    await llama.add_file(
+        filename=file.filename,
+        content=file.file,
+        content_type=file.content_type)
+
+
+@app.post('/llama/clear-files')
+async def llama_clear_files() -> None:
+  if llama is None:
+    raise RuntimeError("llama assistant hasn't loaded yet")
+  await llama.clear_files()
+
+
 @app.post('/llama/add-conversation')
 async def llama_add_conversation(message: UserMessage) -> List[AttributedAnswer]:
   if llama is None:

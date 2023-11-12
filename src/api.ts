@@ -129,6 +129,32 @@ export async function llamaGet(): Promise<void> {
   });
 }
 
+export async function llamaListFiles(): Promise<string[]> {
+  const response = await fetch('http://localhost:8001/llama/list-files', {
+    method: 'GET',
+  });
+  return await response.json();
+}
+
+export async function llamaAddFiles(files: FileList): Promise<void> {
+  const formData = new FormData();
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i];
+    formData.append('files', file, file.name);
+  }
+
+  await fetch('http://localhost:8001/llama/add-files', {
+    method: 'POST',
+    body: formData,
+  });
+}
+
+export async function llamaClearFiles(): Promise<void> {
+  await fetch('http://localhost:8001/llama/clear-files', {
+    method: 'POST',
+  });
+}
+
 export async function llamaAddConversation(
   message: string
 ): Promise<AttributedAnswer[]> {

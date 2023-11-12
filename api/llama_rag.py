@@ -1,9 +1,24 @@
 import asyncio
+from llama_index import (
+    LLMPredictor,
+    VectorStoreIndex,
+)
 import llama_index.vector_stores.google.generativeai.genai_extension as genaix
-from llama_index.indices.managed.google.generativeai import GoogleIndex
+from llama_index.vector_stores.google.generativeai import (
+    GoogleVectorStore,
+    google_service_context,
+)
 from llama_index.indices.query.base import BaseQueryEngine
-from llama_index.response.schema import PydanticResponse
-from llama_index.response_synthesizers.google.generativeai import SynthesizedResponse
+from llama_index.indices.query.query_transform.base import (
+    StepDecomposeQueryTransform,
+)
+from llama_index.query_engine.multistep_query_engine import (
+    MultiStepQueryEngine,
+)
+from llama_index.response.schema import Response
+from llama_index.response_synthesizers.google.generativeai import (
+    GoogleTextSynthesizer,
+)
 from llama_index.schema import NodeRelationship, RelatedNodeInfo, TextNode
 import logging
 from openai._types import FileContent
@@ -27,70 +42,89 @@ class ConversationMessage(BaseModel):
 
 
 class LlamaRag(BaseRag):
-  _client: GoogleIndex = PrivateAttr()
+  _store: GoogleVectorStore = PrivateAttr()
   _query_engine: BaseQueryEngine = PrivateAttr()
-  _palm: PaLM = PrivateAttr()
 
   conversation: List[ConversationMessage] = []
 
-  def __init__(self, client: GoogleIndex) -> None:
+  def __init__(self, store: GoogleVectorStore) -> None:
     super().__init__()
-    self._client = client
-    self._query_engine = client.as_query_engine()
-    self._palm = PaLM()
+
+    index = VectorStoreIndex.from_vector_store(
+        vector_store=store,
+        service_context=google_service_context)
+    response_synthesizer = GoogleTextSynthesizer()
+    single_step_query_engine = index.as_query_engine(
+        response_synthesizer=response_synthesizer)
+    step_decompose_transform = StepDecomposeQueryTransform(
+        LLMPredictor(llm=PaLM()), verbose=True)
+    query_engine = MultiStepQueryEngine(
+        query_engine=single_step_query_engine,
+        query_transform=step_decompose_transform,
+        response_synthesizer=response_synthesizer,
+        index_summary="Ask me anything.",
+        num_steps=6)
+
+    self._store = store
+    self._query_engine = query_engine
 
   @classmethod
   async def create(cls, *, corpus_id: str, display_name: str) -> "LlamaRag":
     return await asyncio.to_thread(
-        lambda: cls._create(
-            corpus_id=corpus_id, display_name=display_name))
+        lambda: cls._create(corpus_id=corpus_id, display_name=display_name)
+    )
 
   @classmethod
   def _create(cls, *, corpus_id: str, display_name: str) -> "LlamaRag":
-    return cls(GoogleIndex.create_corpus(
-        corpus_id=corpus_id, display_name=display_name))
+    return cls(
+      GoogleVectorStore.create_corpus(
+          corpus_id=corpus_id,
+          display_name=display_name)
+    )
 
   @classmethod
-  async def get(
-      cls, *, corpus_id: str = "ltsang-rag-comparision"
-  ) -> "LlamaRag":
+  async def get(cls, *, corpus_id: str = "ltsang-llama") -> "LlamaRag":
     return await asyncio.to_thread(lambda: cls._get(corpus_id=corpus_id))
 
   @classmethod
   def _get(cls, *, corpus_id: str) -> "LlamaRag":
     try:
-      return cls(GoogleIndex.from_corpus(corpus_id=corpus_id))
+      return cls(GoogleVectorStore.from_corpus(corpus_id=corpus_id))
     except Exception as e:
       _logger.warning(f"Cannot find corpus {corpus_id}: {e}. Creating it.")
       return LlamaRag._create(
-          corpus_id=corpus_id, display_name="RAG comparision corpus")
+          corpus_id=corpus_id,
+          display_name="RAG comparision with LlamaIndex"
+      )
 
   async def list_files(self) -> Iterable[str]:
     return await asyncio.to_thread(lambda: self._list_files())
 
   def _list_files(self) -> Iterable[str]:
     return [
-      document.display_name or "?"
-      for document in genaix.list_documents(corpus_id=self._client.corpus_id)]
+        document.display_name or "?"
+        for document in genaix.list_documents(
+            corpus_id=self._store.corpus_id)
+    ]
 
   async def add_file(
       self, *, filename: str, content: FileContent, content_type: str
   ) -> None:
     return await asyncio.to_thread(
         lambda: self._add_file(
-            filename=filename, content=content, content_type=content_type))
+            filename=filename, content=content, content_type=content_type
+        )
+    )
 
   def _add_file(
       self, *, filename: str, content: FileContent, content_type: str
   ) -> None:
     assert isinstance(content, SpooledTemporaryFile)
-    elements = partition(
-        file=content,
-        content_type=content_type)
+    elements = partition(file=content, content_type=content_type)
     text_chunks = [" ".join(str(el).split()) for el in elements]
 
     doc_id = str(uuid.uuid4())
-    self._client.insert_nodes(
+    self._store.add(
         [
             TextNode(
                 text=chunk,
@@ -99,7 +133,8 @@ class LlamaRag(BaseRag):
                         node_id=doc_id,
                         metadata={"file_name": filename},
                     )
-                },)
+                },
+            )
             for chunk in text_chunks
         ]
     )
@@ -108,40 +143,50 @@ class LlamaRag(BaseRag):
     return await asyncio.to_thread(lambda: self._clear_files())
 
   def _clear_files(self) -> None:
-    for document in genaix.list_documents(corpus_id=self._client.corpus_id):
+    for document in genaix.list_documents(corpus_id=self._store.corpus_id):
       genaix.delete_document(
-          corpus_id=self._client.corpus_id,
-          document_id=document.document_id)
+          corpus_id=self._store.corpus_id, document_id=document.document_id
+      )
 
   async def add_conversation(self, message: str) -> Iterable[AttributedAnswer]:
     return await asyncio.to_thread(lambda: self._add_conversation(message))
 
   def _add_conversation(self, message: str) -> Iterable[AttributedAnswer]:
-    wrapper_response = self._query_engine.query(message)
-    assert isinstance(wrapper_response, PydanticResponse)
-    response = wrapper_response.response
-    assert isinstance(response, SynthesizedResponse)
+    response = self._query_engine.query(message)
+    assert isinstance(response, Response)
 
     assistant_message = AttributedAnswer(
-        answer=response.answer or '',
-        citations=response.attributed_passages,
-        score=response.answerable_probability,
+        answer=response.response or '',
+        citations=[node.text
+                   for node in response.source_nodes if node.score is None],
+        score=_get_answerable_probability(response),
     )
 
-    self.conversation.extend([
-      ConversationMessage(
-        role="user",
-        message=AttributedAnswer(
-          answer=message,
-        )
-      ),
-      ConversationMessage(
-        role="assistant",
-        message=assistant_message,
-      ),
-    ])
+    self.conversation.extend(
+        [
+            ConversationMessage(
+                role="user",
+                message=AttributedAnswer(
+                    answer=message,
+                ),
+            ),
+            ConversationMessage(
+                role="assistant",
+                message=assistant_message,
+            ),
+        ]
+    )
 
     return [assistant_message]
 
   async def clear_conversation(self) -> None:
-    self.conversation = []
+      self.conversation = []
+
+
+def _get_answerable_probability(response: Response) -> float | None:
+  if response.metadata is None:
+    return None
+  value = response.metadata.get("answerable_probability", None)
+  if value is None:
+    return None
+  return float(value)
