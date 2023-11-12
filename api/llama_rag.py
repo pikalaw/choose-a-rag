@@ -12,6 +12,7 @@ from llama_index.indices.query.base import BaseQueryEngine
 from llama_index.indices.query.query_transform.base import (
     StepDecomposeQueryTransform,
 )
+from llama_index.prompts.base import PromptTemplate
 from llama_index.query_engine.multistep_query_engine import (
     MultiStepQueryEngine,
 )
@@ -41,6 +42,63 @@ class ConversationMessage(BaseModel):
   message: AttributedAnswer
 
 
+_STEP_DECOMPOSE_QUERY_TRANSFORM_TMPL = (
+    "The original question is as follows: {query_str}\n"
+    "We have an opportunity to answer some, or all of the question from a "
+    "knowledge source. "
+    "Context information for the knowledge source is provided below, as "
+    "well as previous reasoning steps.\n"
+    "Given the context and previous reasoning, return a question that can "
+    "be answered from "
+    "the context. This question can be the same as the original question, "
+    "or this question can represent a subcomponent of the overall question."
+    "It should not be irrelevant to the original question.\n"
+    "If we are confident that we already have enough information to answer "
+    "the original question, provide 'None' as the answer. "
+    "On the other hand, if you do not have enough information to answer the "
+    "original question, you must not provide 'None' as the answer. "
+    "Instead, you must ask a new question!\n\n"
+    "Some examples are given below: "
+    "\n\n"
+    "Question: How many Grand Slam titles does the winner of the 2020 Australian "
+    "Open have?\n"
+    "Knowledge source context: Provides names of the winners of the 2020 "
+    "Australian Open\n"
+    "Previous reasoning: None\n"
+    "Next question: Who was the winner of the 2020 Australian Open? "
+    "\n\n"
+    "Question: Who was the winner of the 2020 Australian Open?\n"
+    "Knowledge source context: Provides names of the winners of the 2020 "
+    "Australian Open\n"
+    "Previous reasoning: None.\n"
+    "New question: Who was the winner of the 2020 Australian Open? "
+    "\n\n"
+    "Question: How many Grand Slam titles does the winner of the 2020 Australian "
+    "Open have?\n"
+    "Knowledge source context: Provides information about the winners of the 2020 "
+    "Australian Open\n"
+    "Previous reasoning:\n"
+    "- Who was the winner of the 2020 Australian Open? \n"
+    "- The winner of the 2020 Australian Open was Novak Djokovic.\n"
+    "New question: None"
+    "\n\n"
+    "Question: How many Grand Slam titles does the winner of the 2020 Australian "
+    "Open have?\n"
+    "Knowledge source context: Provides information about the winners of the 2020 "
+    "Australian Open - includes biographical information for each winner\n"
+    "Previous reasoning:\n"
+    "- Who was the winner of the 2020 Australian Open? \n"
+    "- The winner of the 2020 Australian Open was Novak Djokovic.\n"
+    "New question: How many Grand Slam titles does Novak Djokovic have? "
+    "\n\n"
+    "Question: {query_str}\n"
+    "Knowledge source context: {context_str}\n"
+    "Previous reasoning: {prev_reasoning}\n"
+    "New question: "
+)
+_STEP_DECOMPOSE_QUERY_TRANSFORM_PROMPT = PromptTemplate(
+  _STEP_DECOMPOSE_QUERY_TRANSFORM_TMPL)
+
 class LlamaRag(BaseRag):
   _store: GoogleVectorStore = PrivateAttr()
   _query_engine: BaseQueryEngine = PrivateAttr()
@@ -57,7 +115,9 @@ class LlamaRag(BaseRag):
     single_step_query_engine = index.as_query_engine(
         response_synthesizer=response_synthesizer)
     step_decompose_transform = StepDecomposeQueryTransform(
-        LLMPredictor(llm=PaLM()), verbose=True)
+        LLMPredictor(llm=PaLM()),
+        step_decompose_query_prompt=_STEP_DECOMPOSE_QUERY_TRANSFORM_PROMPT,
+        verbose=True)
     query_engine = MultiStepQueryEngine(
         query_engine=single_step_query_engine,
         query_transform=step_decompose_transform,
