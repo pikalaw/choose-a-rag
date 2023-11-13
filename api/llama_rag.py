@@ -143,7 +143,7 @@ class LlamaRag(BaseRag):
     )
 
   @classmethod
-  async def get(cls, *, corpus_id: str = "ltsang-llama") -> "LlamaRag":
+  async def get(cls, *, corpus_id: str = "ltsang-llama-1") -> "LlamaRag":
     return await asyncio.to_thread(lambda: cls._get(corpus_id=corpus_id))
 
   @classmethod
