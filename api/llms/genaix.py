@@ -17,4 +17,8 @@ def generate_text(model: str, prompt: str) -> str:
           model=model,
           prompt=genai.TextPrompt(
               text=prompt)))
-  return response.candidates[0].output
+  candidates = list(response.candidates)
+  if len(candidates) == 0:
+    return ''
+  candidate = candidates[0]
+  return str(candidate.output)

@@ -1,8 +1,12 @@
-from fastapi import FastAPI, UploadFile
+from fastapi import FastAPI, Request, UploadFile
+from fastapi.exception_handlers import (
+    http_exception_handler,
+)
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
 import logging
 from pydantic import BaseModel
-from typing import List
+from typing import Any, List
 from .base_rag import AttributedAnswer
 from .google_rag import GoogleRag
 from .llama_rag import LlamaRag
@@ -26,6 +30,17 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.exception_handler(Exception)
+async def exception_handler(request: Request, exc: Any) -> JSONResponse:
+    return JSONResponse(
+        status_code=500,
+        content={"message": exc.message},
+        headers={
+            "Access-Control-Allow-Origin": "*",
+        }
+    )
 
 
 @app.get('/')

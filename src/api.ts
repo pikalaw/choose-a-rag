@@ -12,15 +12,23 @@ export interface AttributedAnswer {
 
 // openai
 export async function openaiGet(): Promise<void> {
-  await fetch('http://localhost:8001/openai/new', {
+  const response = await fetch('http://localhost:8001/openai/new', {
     method: 'POST',
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 export async function openaiListFiles(): Promise<string[]> {
   const response = await fetch('http://localhost:8001/openai/list-files', {
     method: 'GET',
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
   return await response.json();
 }
 
@@ -31,16 +39,24 @@ export async function openaiAddFiles(files: FileList): Promise<void> {
     formData.append('files', file, file.name);
   }
 
-  await fetch('http://localhost:8001/openai/add-files', {
+  const response = await fetch('http://localhost:8001/openai/add-files', {
     method: 'POST',
     body: formData,
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 export async function openaiClearFiles(): Promise<void> {
-  await fetch('http://localhost:8001/openai/clear-files', {
+  const response = await fetch('http://localhost:8001/openai/clear-files', {
     method: 'POST',
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 export async function openaiAddConversation(
@@ -56,27 +72,46 @@ export async function openaiAddConversation(
       body: JSON.stringify({text: message}),
     }
   );
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
   const answers: AttributedAnswer[] = await response.json();
   return answers;
 }
 
 export async function openaiClearConversation(): Promise<void> {
-  await fetch('http://localhost:8001/openai/clear-conversation', {
-    method: 'POST',
-  });
+  const response = await fetch(
+    'http://localhost:8001/openai/clear-conversation',
+    {
+      method: 'POST',
+    }
+  );
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 // google
 export async function googleGet(): Promise<void> {
-  await fetch('http://localhost:8001/google/new', {
+  const response = await fetch('http://localhost:8001/google/new', {
     method: 'POST',
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 export async function googleListFiles(): Promise<string[]> {
   const response = await fetch('http://localhost:8001/google/list-files', {
     method: 'GET',
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
   return await response.json();
 }
 
@@ -87,16 +122,24 @@ export async function googleAddFiles(files: FileList): Promise<void> {
     formData.append('files', file, file.name);
   }
 
-  await fetch('http://localhost:8001/google/add-files', {
+  const response = await fetch('http://localhost:8001/google/add-files', {
     method: 'POST',
     body: formData,
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 export async function googleClearFiles(): Promise<void> {
-  await fetch('http://localhost:8001/google/clear-files', {
+  const response = await fetch('http://localhost:8001/google/clear-files', {
     method: 'POST',
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 export async function googleAddConversation(
@@ -112,27 +155,46 @@ export async function googleAddConversation(
       body: JSON.stringify({text: message}),
     }
   );
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
   const answers: AttributedAnswer[] = await response.json();
   return answers;
 }
 
 export async function googleClearConversation(): Promise<void> {
-  await fetch('http://localhost:8001/google/clear-conversation', {
-    method: 'POST',
-  });
+  const response = await fetch(
+    'http://localhost:8001/google/clear-conversation',
+    {
+      method: 'POST',
+    }
+  );
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 // google+llama
 export async function llamaGet(): Promise<void> {
-  await fetch('http://localhost:8001/llama/new', {
+  const response = await fetch('http://localhost:8001/llama/new', {
     method: 'POST',
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 export async function llamaListFiles(): Promise<string[]> {
   const response = await fetch('http://localhost:8001/llama/list-files', {
     method: 'GET',
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
   return await response.json();
 }
 
@@ -143,16 +205,24 @@ export async function llamaAddFiles(files: FileList): Promise<void> {
     formData.append('files', file, file.name);
   }
 
-  await fetch('http://localhost:8001/llama/add-files', {
+  const response = await fetch('http://localhost:8001/llama/add-files', {
     method: 'POST',
     body: formData,
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 export async function llamaClearFiles(): Promise<void> {
-  await fetch('http://localhost:8001/llama/clear-files', {
+  const response = await fetch('http://localhost:8001/llama/clear-files', {
     method: 'POST',
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }
 
 export async function llamaAddConversation(
@@ -165,12 +235,23 @@ export async function llamaAddConversation(
     },
     body: JSON.stringify({text: message}),
   });
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
   const answers: AttributedAnswer[] = await response.json();
   return answers;
 }
 
 export async function llamaClearConversation(): Promise<void> {
-  await fetch('http://localhost:8001/llama/clear-conversation', {
-    method: 'POST',
-  });
+  const response = await fetch(
+    'http://localhost:8001/llama/clear-conversation',
+    {
+      method: 'POST',
+    }
+  );
+  if (!response.ok) {
+    const message = await response.json();
+    throw new Error(message.message);
+  }
 }

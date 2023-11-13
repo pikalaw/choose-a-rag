@@ -67,11 +67,14 @@ async function queryGoogle(query: string): Promise<void> {
       }
     }
   } catch (error) {
-    chatBox.addTheirMessage({
-      host: GOOGLE,
-      sender: 'SYSTEM',
-      message: String(error),
-    });
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: GOOGLE,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
   }
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
 }
@@ -107,11 +110,14 @@ async function queryLlama(query: string): Promise<void> {
       }
     }
   } catch (error) {
-    chatBox.addTheirMessage({
-      host: LLAMA,
-      sender: 'SYSTEM',
-      message: String(error),
-    });
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: LLAMA,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
   }
   chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
 }
@@ -147,14 +153,27 @@ async function queryOpenai(query: string): Promise<void> {
       }
     }
   } catch (error) {
-    chatBox.addTheirMessage({
-      host: OPENAI,
-      sender: 'SYSTEM',
-      message: String(error),
-    });
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: OPENAI,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
   }
   chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
 }
+
+const openaiRunFile = getElement<HTMLInputElement>('.run-file.openai', {
+  from: document,
+});
+const googleRunFile = getElement<HTMLInputElement>('.run-file.google', {
+  from: document,
+});
+const llamaRunFile = getElement<HTMLInputElement>('.run-file.llama', {
+  from: document,
+});
 
 const fileUpload = getElement<HTMLInputElement>('#files', {from: document});
 fileUpload.addEventListener('change', async () => {
@@ -162,11 +181,11 @@ fileUpload.addEventListener('change', async () => {
 
   const files = fileUpload.files;
   if (files !== null) {
-    await Promise.all([
-      googleFileUpload(files),
-      llamaFileUpload(files),
-      openaiFileUpload(files),
-    ]);
+    const runFiles: Promise<void>[] = [];
+    if (openaiRunFile.checked) runFiles.push(openaiFileUpload(files));
+    if (googleRunFile.checked) runFiles.push(googleFileUpload(files));
+    if (llamaRunFile.checked) runFiles.push(llamaFileUpload(files));
+    await Promise.all(runFiles);
   }
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
@@ -201,7 +220,20 @@ function updateFileList({
   filenames: string[];
 }) {
   const div = getElement<HTMLElement>(`.file-list.${host}`, {from: document});
-  div.innerHTML = filenames.map(fn => `<li>${fn}</li>`).join('\n');
+  div.innerHTML = filenames
+    .sort((a, b) => {
+      const lowerCaseA = a.toLowerCase();
+      const lowerCaseB = b.toLowerCase();
+      if (lowerCaseA < lowerCaseB) {
+        return -1;
+      }
+      if (lowerCaseA > lowerCaseB) {
+        return 1;
+      }
+      return 0;
+    })
+    .map(fn => `<li>${fn}</li>`)
+    .join('\n');
 }
 
 const deleteFilesButton = getElement<HTMLInputElement>('.delete-files-button', {
@@ -209,11 +241,13 @@ const deleteFilesButton = getElement<HTMLInputElement>('.delete-files-button', {
 });
 deleteFilesButton.addEventListener('click', async () => {
   chatBox.turnQueryBox('disabled', 'Clearing files...');
-  await Promise.all([
-    googleClearFiles(),
-    llamaClearFiles(),
-    openaiClearFiles(),
-  ]);
+
+  const runFiles: Promise<void>[] = [];
+  if (openaiRunFile.checked) runFiles.push(openaiClearFiles());
+  if (googleRunFile.checked) runFiles.push(googleClearFiles());
+  if (llamaRunFile.checked) runFiles.push(llamaClearFiles());
+  await Promise.all(runFiles);
+
   chatBox.turnQueryBox('enabled', welcomeMessage);
 });
 

@@ -24,6 +24,7 @@ llama-hub = "^0.0.43"
 unstructured = {extras = ["all-docs"], version = "^0.10.29"}
 torch = ">=2.0.0, !=2.0.1, !=2.1.0"
 llama-index = {git = "https://github.com/pikalaw/llama_index.git", rev = "managed_index"}
+pytesseract = "^0.3.10"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.6.1"
