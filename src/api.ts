@@ -1,5 +1,7 @@
+const api = '/api';
+
 export async function getWelcome(): Promise<string> {
-  const response = await fetch('http://localhost:8001/');
+  const response = await fetch(`${api}/`);
   const message = await response.json();
   return message.message;
 }
@@ -12,7 +14,7 @@ export interface AttributedAnswer {
 
 // openai
 export async function openaiGet(): Promise<void> {
-  const response = await fetch('http://localhost:8001/openai/new', {
+  const response = await fetch(`${api}/openai/new`, {
     method: 'POST',
   });
   if (!response.ok) {
@@ -22,7 +24,7 @@ export async function openaiGet(): Promise<void> {
 }
 
 export async function openaiListFiles(): Promise<string[]> {
-  const response = await fetch('http://localhost:8001/openai/list-files', {
+  const response = await fetch(`${api}/openai/list-files`, {
     method: 'GET',
   });
   if (!response.ok) {
@@ -39,7 +41,7 @@ export async function openaiAddFiles(files: FileList): Promise<void> {
     formData.append('files', file, file.name);
   }
 
-  const response = await fetch('http://localhost:8001/openai/add-files', {
+  const response = await fetch(`${api}/openai/add-files`, {
     method: 'POST',
     body: formData,
   });
@@ -50,7 +52,7 @@ export async function openaiAddFiles(files: FileList): Promise<void> {
 }
 
 export async function openaiClearFiles(): Promise<void> {
-  const response = await fetch('http://localhost:8001/openai/clear-files', {
+  const response = await fetch(`${api}/openai/clear-files`, {
     method: 'POST',
   });
   if (!response.ok) {
@@ -62,16 +64,13 @@ export async function openaiClearFiles(): Promise<void> {
 export async function openaiAddConversation(
   message: string
 ): Promise<AttributedAnswer[]> {
-  const response = await fetch(
-    'http://localhost:8001/openai/add-conversation',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({text: message}),
-    }
-  );
+  const response = await fetch(`${api}/openai/add-conversation`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({text: message}),
+  });
   if (!response.ok) {
     const message = await response.json();
     throw new Error(message.message);
@@ -81,12 +80,9 @@ export async function openaiAddConversation(
 }
 
 export async function openaiClearConversation(): Promise<void> {
-  const response = await fetch(
-    'http://localhost:8001/openai/clear-conversation',
-    {
-      method: 'POST',
-    }
-  );
+  const response = await fetch(`${api}/openai/clear-conversation`, {
+    method: 'POST',
+  });
   if (!response.ok) {
     const message = await response.json();
     throw new Error(message.message);
@@ -95,7 +91,7 @@ export async function openaiClearConversation(): Promise<void> {
 
 // google
 export async function googleGet(): Promise<void> {
-  const response = await fetch('http://localhost:8001/google/new', {
+  const response = await fetch(`${api}/google/new`, {
     method: 'POST',
   });
   if (!response.ok) {
@@ -105,7 +101,7 @@ export async function googleGet(): Promise<void> {
 }
 
 export async function googleListFiles(): Promise<string[]> {
-  const response = await fetch('http://localhost:8001/google/list-files', {
+  const response = await fetch(`${api}/google/list-files`, {
     method: 'GET',
   });
   if (!response.ok) {
@@ -122,7 +118,7 @@ export async function googleAddFiles(files: FileList): Promise<void> {
     formData.append('files', file, file.name);
   }
 
-  const response = await fetch('http://localhost:8001/google/add-files', {
+  const response = await fetch(`${api}/google/add-files`, {
     method: 'POST',
     body: formData,
   });
@@ -133,7 +129,7 @@ export async function googleAddFiles(files: FileList): Promise<void> {
 }
 
 export async function googleClearFiles(): Promise<void> {
-  const response = await fetch('http://localhost:8001/google/clear-files', {
+  const response = await fetch(`${api}/google/clear-files`, {
     method: 'POST',
   });
   if (!response.ok) {
@@ -145,16 +141,13 @@ export async function googleClearFiles(): Promise<void> {
 export async function googleAddConversation(
   message: string
 ): Promise<AttributedAnswer[]> {
-  const response = await fetch(
-    'http://localhost:8001/google/add-conversation',
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({text: message}),
-    }
-  );
+  const response = await fetch(`${api}/google/add-conversation`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({text: message}),
+  });
   if (!response.ok) {
     const message = await response.json();
     throw new Error(message.message);
@@ -164,12 +157,9 @@ export async function googleAddConversation(
 }
 
 export async function googleClearConversation(): Promise<void> {
-  const response = await fetch(
-    'http://localhost:8001/google/clear-conversation',
-    {
-      method: 'POST',
-    }
-  );
+  const response = await fetch(`${api}/google/clear-conversation`, {
+    method: 'POST',
+  });
   if (!response.ok) {
     const message = await response.json();
     throw new Error(message.message);
@@ -178,7 +168,7 @@ export async function googleClearConversation(): Promise<void> {
 
 // google+llama
 export async function llamaGet(): Promise<void> {
-  const response = await fetch('http://localhost:8001/llama/new', {
+  const response = await fetch(`${api}/llama/new`, {
     method: 'POST',
   });
   if (!response.ok) {
@@ -188,7 +178,7 @@ export async function llamaGet(): Promise<void> {
 }
 
 export async function llamaListFiles(): Promise<string[]> {
-  const response = await fetch('http://localhost:8001/llama/list-files', {
+  const response = await fetch(`${api}/llama/list-files`, {
     method: 'GET',
   });
   if (!response.ok) {
@@ -205,7 +195,7 @@ export async function llamaAddFiles(files: FileList): Promise<void> {
     formData.append('files', file, file.name);
   }
 
-  const response = await fetch('http://localhost:8001/llama/add-files', {
+  const response = await fetch(`${api}/llama/add-files`, {
     method: 'POST',
     body: formData,
   });
@@ -216,7 +206,7 @@ export async function llamaAddFiles(files: FileList): Promise<void> {
 }
 
 export async function llamaClearFiles(): Promise<void> {
-  const response = await fetch('http://localhost:8001/llama/clear-files', {
+  const response = await fetch(`${api}/llama/clear-files`, {
     method: 'POST',
   });
   if (!response.ok) {
@@ -228,7 +218,7 @@ export async function llamaClearFiles(): Promise<void> {
 export async function llamaAddConversation(
   message: string
 ): Promise<AttributedAnswer[]> {
-  const response = await fetch('http://localhost:8001/llama/add-conversation', {
+  const response = await fetch(`${api}/llama/add-conversation`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -244,12 +234,9 @@ export async function llamaAddConversation(
 }
 
 export async function llamaClearConversation(): Promise<void> {
-  const response = await fetch(
-    'http://localhost:8001/llama/clear-conversation',
-    {
-      method: 'POST',
-    }
-  );
+  const response = await fetch(`${api}/llama/clear-conversation`, {
+    method: 'POST',
+  });
   if (!response.ok) {
     const message = await response.json();
     throw new Error(message.message);

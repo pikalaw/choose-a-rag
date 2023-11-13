@@ -1,5 +1,5 @@
 start:
-	uvicorn api.server:app --reload --port 8001
+	uvicorn api.server:app --reload --host okapi.c.googlers.com --port 8000
 
 check_type:
 	mypy
@@ -31,8 +31,5 @@ update-env-client:
 update-env-server:
 	python3 -m pip install -r requirements.txt --upgrade
 
-kill-client:
-	fuser -k 8000/tcp
-
 kill-server:
-	fuser -k 8001/tcp
+	fuser -k 8000/tcp

@@ -5,7 +5,7 @@
   "source": "index.html",
   "type": "module",
   "scripts": {
-    "start": "npx parcel -p 8000",
+    "start": "npx parcel watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "gts lint",
     "clean": "gts clean",
@@ -13,7 +13,8 @@
     "fix": "gts fix",
     "prepare": "npm run compile",
     "pretest": "npm run compile",
-    "posttest": "npm run lint"
+    "posttest": "npm run lint",
+    "watch": "npm run watch"
   },
   "author": "",
   "license": "ISC",

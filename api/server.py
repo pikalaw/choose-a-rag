@@ -1,9 +1,7 @@
 from fastapi import FastAPI, Request, UploadFile
-from fastapi.exception_handlers import (
-    http_exception_handler,
-)
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 import logging
 from pydantic import BaseModel
 from typing import Any, List
@@ -21,7 +19,7 @@ _logger.addHandler(logging.StreamHandler())
 
 # CORS.
 origins = [
-    "http://localhost:8000",
+    "*",
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -43,11 +41,6 @@ async def exception_handler(request: Request, exc: Any) -> JSONResponse:
     )
 
 
-@app.get('/')
-async def root() -> dict[str, str]:
-    return {'message': 'Hello World'}
-
-
 class UserMessage(BaseModel):
     text: str
 
@@ -56,21 +49,21 @@ class UserMessage(BaseModel):
 openai: OpenaiRag | None
 
 
-@app.post('/openai/new')
+@app.post('/api/openai/new')
 async def openai_new() -> None:
   global openai
   # We just reuse an existing one.
   openai = await OpenaiRag.get()
 
 
-@app.get('/openai/list-files')
+@app.get('/api/openai/list-files')
 async def openai_list_file() -> List[str]:
   if openai is None:
     raise RuntimeError("OpenAI assistant hasn't loaded yet")
   return list(await openai.list_files())
 
 
-@app.post('/openai/add-files')
+@app.post('/api/openai/add-files')
 async def openai_add_file(files: List[UploadFile]) -> None:
   if openai is None:
     raise RuntimeError("OpenAI assistant hasn't loaded yet")
@@ -83,21 +76,21 @@ async def openai_add_file(files: List[UploadFile]) -> None:
         content_type=file.content_type)
 
 
-@app.post('/openai/clear-files')
+@app.post('/api/openai/clear-files')
 async def openai_clear_files() -> None:
   if openai is None:
     raise RuntimeError("OpenAI assistant hasn't loaded yet")
   await openai.clear_files()
 
 
-@app.post('/openai/add-conversation')
+@app.post('/api/openai/add-conversation')
 async def openai_add_conversation(message: UserMessage) -> List[AttributedAnswer]:
   if openai is None:
     raise RuntimeError("OpenAI assistant hasn't loaded yet")
   return list(await openai.add_conversation(message.text))
 
 
-@app.post('/openai/clear-conversation')
+@app.post('/api/openai/clear-conversation')
 async def openai_clear_conversation() -> None:
   if openai is None:
     raise RuntimeError("OpenAI assistant hasn't loaded yet")
@@ -108,21 +101,21 @@ async def openai_clear_conversation() -> None:
 google: GoogleRag | None
 
 
-@app.post('/google/new')
+@app.post('/api/google/new')
 async def google_new() -> None:
   global google
   # Try to reuse an existing one.
   google = await GoogleRag.get()
 
 
-@app.get('/google/list-files')
+@app.get('/api/google/list-files')
 async def google_list_file() -> List[str]:
   if google is None:
     raise RuntimeError("Google assistant hasn't loaded yet")
   return list(await google.list_files())
 
 
-@app.post('/google/add-files')
+@app.post('/api/google/add-files')
 async def google_add_file(files: List[UploadFile]) -> None:
   if google is None:
     raise RuntimeError("Google assistant hasn't loaded yet")
@@ -135,21 +128,21 @@ async def google_add_file(files: List[UploadFile]) -> None:
         content_type=file.content_type)
 
 
-@app.post('/google/clear-files')
+@app.post('/api/google/clear-files')
 async def google_clear_files() -> None:
   if google is None:
     raise RuntimeError("Google assistant hasn't loaded yet")
   await google.clear_files()
 
 
-@app.post('/google/add-conversation')
+@app.post('/api/google/add-conversation')
 async def google_add_conversation(message: UserMessage) -> List[AttributedAnswer]:
   if google is None:
     raise RuntimeError("Google assistant hasn't loaded yet")
   return list(await google.add_conversation(message.text))
 
 
-@app.post('/google/clear-conversation')
+@app.post('/api/google/clear-conversation')
 async def google_clear_conversation() -> None:
   if google is None:
     raise RuntimeError("Google assistant hasn't loaded yet")
@@ -160,21 +153,21 @@ async def google_clear_conversation() -> None:
 llama: LlamaRag | None
 
 
-@app.post('/llama/new')
+@app.post('/api/llama/new')
 async def llama_new() -> None:
   global llama
   # Try to reuse an existing one.
   llama = await LlamaRag.get()
 
 
-@app.get('/llama/list-files')
+@app.get('/api/llama/list-files')
 async def llama_list_file() -> List[str]:
   if llama is None:
     raise RuntimeError("llama assistant hasn't loaded yet")
   return list(await llama.list_files())
 
 
-@app.post('/llama/add-files')
+@app.post('/api/llama/add-files')
 async def llama_add_file(files: List[UploadFile]) -> None:
   if llama is None:
     raise RuntimeError("llama assistant hasn't loaded yet")
@@ -187,22 +180,25 @@ async def llama_add_file(files: List[UploadFile]) -> None:
         content_type=file.content_type)
 
 
-@app.post('/llama/clear-files')
+@app.post('/api/llama/clear-files')
 async def llama_clear_files() -> None:
   if llama is None:
     raise RuntimeError("llama assistant hasn't loaded yet")
   await llama.clear_files()
 
 
-@app.post('/llama/add-conversation')
+@app.post('/api/llama/add-conversation')
 async def llama_add_conversation(message: UserMessage) -> List[AttributedAnswer]:
   if llama is None:
     raise RuntimeError("llama assistant hasn't loaded yet")
   return list(await llama.add_conversation(message.text))
 
 
-@app.post('/llama/clear-conversation')
+@app.post('/api/llama/clear-conversation')
 async def llama_clear_conversation() -> None:
   if llama is None:
     raise RuntimeError("llama assistant hasn't loaded yet")
   await llama.clear_conversation()
+
+
+app.mount("/", StaticFiles(directory="dist", html=True), name="webapp")
