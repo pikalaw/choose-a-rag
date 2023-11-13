@@ -193,22 +193,55 @@ fileUpload.addEventListener('change', async () => {
 
 async function googleFileUpload(files: FileList): Promise<void> {
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
-  await api.googleAddFiles(files);
-  updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+  try {
+    await api.googleAddFiles(files);
+    updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: GOOGLE,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
 }
 
 async function llamaFileUpload(files: FileList): Promise<void> {
   chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
-  await api.llamaAddFiles(files);
-  updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
+  try {
+    await api.llamaAddFiles(files);
+    updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: LLAMA,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
   chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
 }
 
 async function openaiFileUpload(files: FileList): Promise<void> {
   chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
-  await api.openaiAddFiles(files);
-  updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
+  try {
+    await api.openaiAddFiles(files);
+    updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: OPENAI,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
   chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
 }
 
@@ -253,22 +286,55 @@ deleteFilesButton.addEventListener('click', async () => {
 
 async function googleClearFiles() {
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
-  await api.googleClearFiles();
-  updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+  try {
+    await api.googleClearFiles();
+    updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: GOOGLE,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
 }
 
 async function llamaClearFiles() {
   chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
-  await api.llamaClearFiles();
-  updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
+  try {
+    await api.llamaClearFiles();
+    updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: LLAMA,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
   chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
 }
 
 async function openaiClearFiles() {
   chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
-  await api.openaiClearFiles();
-  updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
+  try {
+    await api.openaiClearFiles();
+    updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: OPENAI,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
   chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
 }
 
@@ -280,22 +346,55 @@ async function startAll() {
 
 async function startGoogle() {
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
-  await api.googleGet();
-  updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+  try {
+    await api.googleGet();
+    updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: GOOGLE,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
   chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
 }
 
 async function startLlama() {
   chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
-  await api.llamaGet();
-  updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
+  try {
+    await api.llamaGet();
+    updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: LLAMA,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
   chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
 }
 
 async function startOpenai() {
   chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
-  await api.openaiGet();
-  updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
+  try {
+    await api.openaiGet();
+    updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBox.addTheirMessage({
+        host: OPENAI,
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
   chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
 }
 
