@@ -181,11 +181,16 @@ fileUpload.addEventListener('change', async () => {
 
   const files = fileUpload.files;
   if (files !== null) {
+    /*
     const runFiles: Promise<void>[] = [];
     if (openaiRunFile.checked) runFiles.push(openaiFileUpload(files));
     if (googleRunFile.checked) runFiles.push(googleFileUpload(files));
     if (llamaRunFile.checked) runFiles.push(llamaFileUpload(files));
     await Promise.all(runFiles);
+    */
+    await openaiFileUpload(files);
+    await googleFileUpload(files);
+    await llamaFileUpload(files);
   }
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
