@@ -273,6 +273,9 @@ const deleteFilesButton = getElement<HTMLInputElement>('.delete-files-button', {
   from: document,
 });
 deleteFilesButton.addEventListener('click', async () => {
+  if (!confirm('Are you sure you want to delete all files?')) {
+    return;
+  }
   chatBox.turnQueryBox('disabled', 'Clearing files...');
 
   const runFiles: Promise<void>[] = [];
