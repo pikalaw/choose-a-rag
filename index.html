@@ -62,7 +62,27 @@
 <body>
   <div class="scoll-down-container">
     <div class="main-view">
-      <h1>Who is the best RAG?</h1>
+      <h1>Who has the best RAG?</h1>
+      <p>
+        Generally, questions you enter will be sent to all three stacks.
+        However, if you prefix the message with these letters, that message will
+        be sent to different stacks:
+        <ul>
+          <li>&lt; left stack</li>
+          <li>^ middle stack</li>
+          <li>&gt; middle stack</li>
+        </ul>
+        Generally, files you upload will be sent to all three stacks.
+        However, if you want to send files to only one stack, deselect the
+        checkbox on the stacks that you do NOT want to receive the file.
+        Same thing for the file deletion.
+
+        <em class="important">
+          Note that this is a shared instance.
+          All files you upload will be seen by everyone!
+          Do not upload personal files!
+        </em>
+      </p>
       <chat-box class="chat-box"></chat-box>
       <div class="file-control">
         <label for="files">New files:</label>

@@ -58,3 +58,24 @@ poetry add git+https://github.com/pikalaw/llama_index.git#managed_index
 poetry add  https://storage.googleapis.com/genai-testing-temp/ai-generativelanguage-v1beta-py.tar.gz
 poetry add -D mypy
 ```
+
+## Authorization
+
+You need to do this one-time setup.
+
+Follow this [guide](https://developers.generativeai.google/tutorials/oauth_quickstart) to get a local copy of your `client_secret.json`.
+Make sure you enable `Generative Language API (Staging)` API.
+
+Make sure the Application type is Desktop and then wait 5 minutes.
+
+IMPORTANT: There is also the production version `Generative Language API`.
+However, that API does not have the retriever endpoints yet!
+
+Then run this command:
+
+```bash
+gcloud auth application-default login  --client-id-file=client_secret.json   --scopes='https://www.googleapis.com/auth/cloud-platform,https://www.googleapis.com/auth/generative-language.tuning'
+```
+
+NOTE: In the near future, you will need to include the scope `https://www.googleapis.com/auth/generative-language.retriever`.
+But for now, you don't need that scope to access the endpoint.

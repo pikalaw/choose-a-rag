@@ -1,5 +1,5 @@
 start:
-	uvicorn api.server:app --reload --host okapi.c.googlers.com --port 8000
+	uvicorn api.server:app --reload --host ltsang01.nyc.corp.google.com --port 8000
 
 check_type:
 	mypy

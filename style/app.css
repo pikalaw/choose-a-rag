@@ -42,3 +42,8 @@ body {
 .space-filler {
   flex: 1;
 }
+
+.important {
+  color: red;
+  font-weight: bold;
+}
