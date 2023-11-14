@@ -1,6 +1,31 @@
 # chatgpt-assistant
 
-## Client-side setup
+## After cloning the repo
+
+```bash
+npm i
+poetry shell
+poetry install
+```
+
+## Run it
+
+```bash
+# Start a shell to continuously build the frontend code
+npm run watch
+# Start a shell to continuously build and serve the backend code
+make start
+```
+
+If you find a stale job occupying the backend port, kill it with this:
+
+```bash
+make kill-server
+```
+
+## Starting from scratch
+
+### Client-side setup
 
 ```bash
 npm init
@@ -22,7 +47,7 @@ Add these to `package.json`:
 ```json
   "source": "index.html",
   "scripts": {
-    "start": "npx parcel -p 8000",
+    "watch": "npx parcel watch",
   },
   "type": "module",
 ```

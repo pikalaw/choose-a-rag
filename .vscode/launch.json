@@ -9,7 +9,14 @@
       "type": "python",
       "request": "launch",
       "module": "uvicorn",
-      "args": ["api.server:app", "--reload", "--port", "8000"],
+      "args": [
+        "api.server:app",
+        "--reload",
+        "--host",
+        "okapi.c.googlers.com",
+        "--port",
+        "8000"
+      ],
       "jinja": true,
       "justMyCode": false
     }
