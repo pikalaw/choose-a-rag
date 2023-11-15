@@ -4,250 +4,74 @@ import {getElement} from './common/view_model.js';
 import * as api from './api.js';
 
 const welcomeMessage = 'How can I help?';
-const GOOGLE = 'google';
-const LLAMA = 'llama';
-const OPENAI = 'openai';
 
 const chatBox = getElement<ChatBox>('.chat-box', {from: document});
 
 chatBox.turnQueryBox('enabled', welcomeMessage);
-chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
-chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
-chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
+chatBox.turnFlashingDots('hidden');
 
 chatBox.addEventListener(queryEventName, async event => {
   chatBox.turnQueryBox('disabled', 'Running...');
 
   const query = (event as CustomEvent<QueryEvent>).detail.text;
-  if (query.startsWith('<')) {
-    await queryOpenai(query.slice(1));
-  } else if (query.startsWith('^')) {
-    await queryGoogle(query.slice(1));
-  } else if (query.startsWith('>')) {
-    await queryLlama(query.slice(1));
-  } else {
-    await Promise.all([
-      queryGoogle(query),
-      queryLlama(query),
-      queryOpenai(query),
-    ]);
-  }
+  await Promise.all([
+    ask({stack: 'google', query}),
+    ask({stack: 'llama', query}),
+    ask({stack: 'openai', query}),
+  ]);
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
 });
 
-async function queryGoogle(query: string): Promise<void> {
-  chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
-  chatBox.addMyMessage({host: GOOGLE, sender: 'User', message: query});
+async function ask({
+  stack,
+  query,
+}: {
+  stack: api.Stack;
+  query: string;
+}): Promise<void> {
+  const chatBoxStack = chatBox.getStack(stack)!;
+  chatBoxStack.turnFlashingDots('visible');
+  chatBoxStack.addMyMessage({sender: 'User', message: query});
   try {
-    const answers = await api.googleAddConversation(query);
+    const answers = await api.addConversation({
+      stack,
+      message: query,
+    });
     for (const answer of answers) {
-      chatBox.addTheirMessage({
-        host: GOOGLE,
+      chatBoxStack.addTheirMessage({
         sender: 'Google',
         message: answer.answer,
       });
+      /*
       if (
         answer.citations !== undefined &&
         answer.citations !== null &&
         answer.citations.length > 0
       ) {
-        chatBox.addTheirMessage({
-          host: GOOGLE,
+        chatBoxStack.addTheirMessage({
           sender: 'Citations',
           message: answer.citations.map(c => `* ${c}`).join('\n'),
         });
       }
       if (answer.score !== undefined && answer.score !== null) {
-        chatBox.addTheirMessage({
-          host: GOOGLE,
+        chatBoxStack.addTheirMessage({
           sender: 'Answerability score',
           message: String(answer.score),
         });
       }
+      */
     }
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: GOOGLE,
+      chatBoxStack.addTheirMessage({
         sender: 'SYSTEM',
         message: error.message,
       });
     }
   }
-  chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
-}
-
-async function queryLlama(query: string): Promise<void> {
-  chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
-  chatBox.addMyMessage({host: LLAMA, sender: 'User', message: query});
-  try {
-    const answers = await api.llamaAddConversation(query);
-    for (const answer of answers) {
-      chatBox.addTheirMessage({
-        host: LLAMA,
-        sender: 'Google+LlamaIndex',
-        message: answer.answer,
-      });
-      if (
-        answer.citations !== undefined &&
-        answer.citations !== null &&
-        answer.citations.length > 0
-      ) {
-        chatBox.addTheirMessage({
-          host: LLAMA,
-          sender: 'Citations',
-          message: answer.citations.map(c => `* ${c}`).join('\n'),
-        });
-      }
-      if (answer.score !== undefined && answer.score !== null) {
-        chatBox.addTheirMessage({
-          host: LLAMA,
-          sender: 'Answerability score',
-          message: String(answer.score),
-        });
-      }
-    }
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: LLAMA,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
-}
-
-async function queryOpenai(query: string): Promise<void> {
-  chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
-  chatBox.addMyMessage({host: OPENAI, sender: 'User', message: query});
-  try {
-    const answers = await api.openaiAddConversation(query);
-    for (const answer of answers) {
-      chatBox.addTheirMessage({
-        host: OPENAI,
-        sender: 'OpenAI',
-        message: answer.answer,
-      });
-      if (
-        answer.citations !== undefined &&
-        answer.citations !== null &&
-        answer.citations.length > 0
-      ) {
-        chatBox.addTheirMessage({
-          host: OPENAI,
-          sender: 'Citations',
-          message: answer.citations.join('\n'),
-        });
-      }
-      if (answer.score !== undefined && answer.score !== null) {
-        chatBox.addTheirMessage({
-          host: OPENAI,
-          sender: 'Answerability score',
-          message: String(answer.score),
-        });
-      }
-    }
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: OPENAI,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
-}
-
-const openaiRunFile = getElement<HTMLInputElement>('.run-file.openai', {
-  from: document,
-});
-const googleRunFile = getElement<HTMLInputElement>('.run-file.google', {
-  from: document,
-});
-const llamaRunFile = getElement<HTMLInputElement>('.run-file.llama', {
-  from: document,
-});
-
-const fileUpload = getElement<HTMLInputElement>('#files', {from: document});
-fileUpload.addEventListener('change', async () => {
-  chatBox.turnQueryBox('disabled', 'Ingesting files...');
-
-  const files = fileUpload.files;
-  if (files !== null) {
-    /*
-    const runFiles: Promise<void>[] = [];
-    if (openaiRunFile.checked) runFiles.push(openaiFileUpload(files));
-    if (googleRunFile.checked) runFiles.push(googleFileUpload(files));
-    if (llamaRunFile.checked) runFiles.push(llamaFileUpload(files));
-    await Promise.all(runFiles);
-    */
-    await openaiFileUpload(files);
-    await googleFileUpload(files);
-    await llamaFileUpload(files);
-  }
-
-  chatBox.turnQueryBox('enabled', welcomeMessage);
-});
-
-async function googleFileUpload(files: FileList): Promise<void> {
-  chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
-  try {
-    await api.googleAddFiles(files);
-    updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: GOOGLE,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
-}
-
-async function llamaFileUpload(files: FileList): Promise<void> {
-  chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
-  try {
-    await api.llamaAddFiles(files);
-    updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: LLAMA,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
-}
-
-async function openaiFileUpload(files: FileList): Promise<void> {
-  chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
-  try {
-    await api.openaiAddFiles(files);
-    updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: OPENAI,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
+  chatBoxStack.turnFlashingDots('hidden');
 }
 
 function updateFileList({
@@ -274,136 +98,27 @@ function updateFileList({
     .join('\n');
 }
 
-const deleteFilesButton = getElement<HTMLInputElement>('.delete-files-button', {
-  from: document,
-});
-deleteFilesButton.addEventListener('click', async () => {
-  if (!confirm('Are you sure you want to delete all files?')) {
-    return;
-  }
-  chatBox.turnQueryBox('disabled', 'Clearing files...');
-
-  const runFiles: Promise<void>[] = [];
-  if (openaiRunFile.checked) runFiles.push(openaiClearFiles());
-  if (googleRunFile.checked) runFiles.push(googleClearFiles());
-  if (llamaRunFile.checked) runFiles.push(llamaClearFiles());
-  await Promise.all(runFiles);
-
-  chatBox.turnQueryBox('enabled', welcomeMessage);
-});
-
-async function googleClearFiles() {
-  chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
-  try {
-    await api.googleClearFiles();
-    updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: GOOGLE,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
-}
-
-async function llamaClearFiles() {
-  chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
-  try {
-    await api.llamaClearFiles();
-    updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: LLAMA,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
-}
-
-async function openaiClearFiles() {
-  chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
-  try {
-    await api.openaiClearFiles();
-    updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: OPENAI,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
-}
-
 async function startAll() {
   chatBox.turnQueryBox('disabled', 'Starting...');
-  await Promise.all([startGoogle(), startLlama(), startOpenai()]);
+  await Promise.all([start('google'), start('llama'), start('openai')]);
   chatBox.turnQueryBox('enabled', welcomeMessage);
 }
 
-async function startGoogle() {
-  chatBox.turnFlashingDots({host: GOOGLE, mode: 'visible'});
+async function start(stack: api.Stack) {
+  const chatBoxStack = chatBox.getStack(stack)!;
+  chatBoxStack.turnFlashingDots('visible');
   try {
-    await api.googleGet();
-    updateFileList({host: GOOGLE, filenames: await api.googleListFiles()});
+    await api.get({stack});
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: GOOGLE,
+      chatBoxStack.addTheirMessage({
         sender: 'SYSTEM',
         message: error.message,
       });
     }
   }
-  chatBox.turnFlashingDots({host: GOOGLE, mode: 'hidden'});
-}
-
-async function startLlama() {
-  chatBox.turnFlashingDots({host: LLAMA, mode: 'visible'});
-  try {
-    await api.llamaGet();
-    updateFileList({host: LLAMA, filenames: await api.llamaListFiles()});
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: LLAMA,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: LLAMA, mode: 'hidden'});
-}
-
-async function startOpenai() {
-  chatBox.turnFlashingDots({host: OPENAI, mode: 'visible'});
-  try {
-    await api.openaiGet();
-    updateFileList({host: OPENAI, filenames: await api.openaiListFiles()});
-  } catch (error) {
-    console.error(error);
-    if (error instanceof Error) {
-      chatBox.addTheirMessage({
-        host: OPENAI,
-        sender: 'SYSTEM',
-        message: error.message,
-      });
-    }
-  }
-  chatBox.turnFlashingDots({host: OPENAI, mode: 'hidden'});
+  chatBoxStack.turnFlashingDots('hidden');
 }
 
 startAll();

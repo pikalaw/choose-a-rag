@@ -5,19 +5,19 @@
   gap: .3em;
 }
 
-.hosts {
+.stacks {
   display: flex;
   gap: .5em;
   justify-content: space-between;
 }
 
-.host {
+.stack {
   display: flex;
   flex-direction: column;
   flex: 1;
 }
 
-.host h3 {
+.name {
   flex: 1;
 }
 
@@ -57,6 +57,11 @@
 
 .their-message {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.signals {
+  display: flex;
+  flex-direction: row;
 }
 
 .flashing-dots {
