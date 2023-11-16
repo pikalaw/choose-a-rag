@@ -7,6 +7,14 @@ export interface AttributedAnswer {
 }
 
 export type Stack = 'openai' | 'google' | 'llama';
+export const stackNames: {
+  [key in Stack]: string;
+} = {
+  openai: 'OpenAI',
+  google: 'Google',
+  llama: 'Google + Advanced RAG (LlamaIndex)',
+};
+export const stacks = Object.keys(stackNames).map(n => n as Stack);
 
 // openai
 export async function get({stack}: {stack: Stack}): Promise<void> {

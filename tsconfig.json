@@ -4,7 +4,7 @@
     "rootDir": "src",
     "outDir": "build",
     "target": "esnext",
-    "lib": ["dom"],
+    "lib": ["dom", "dom.iterable"],
     "module": "nodenext",
     "moduleResolution": "nodenext",
     "inlineSources": true,

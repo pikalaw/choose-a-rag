@@ -1,13 +1,12 @@
 import {
   getElement,
+  getElementAll,
   loadTemplate,
   htmlToElement,
   markdown,
 } from './common/view_model.js';
 import './flashing_dots.js';
-import './rating_thumbs.js';
-import type * as api from './api.js';
-import {RatingEvent, ratingEventName, RatingThumbs} from './rating_thumbs.js';
+import * as api from './api.js';
 
 /// query event.
 export const queryEventName = 'query';
@@ -16,42 +15,9 @@ export interface QueryEvent {
 }
 
 export class ChatBox extends HTMLElement {
-  readonly openai: ChatBoxStack;
-  readonly google: ChatBoxStack;
-  readonly llama: ChatBoxStack;
-
-  private readonly all: ChatBoxStack[];
-
   constructor() {
     super();
     loadTemplate('#chat-box', {into: this});
-
-    this.openai = getElement<ChatBoxStack>('.stack.openai', {from: this});
-    this.google = getElement<ChatBoxStack>('.stack.google', {from: this});
-    this.llama = getElement<ChatBoxStack>('.stack.llama', {from: this});
-    this.all = [this.openai, this.google, this.llama];
-
-    this.openai.addEventListener(ratingEventName, event => {
-      const rating = (event as CustomEvent<RatingEvent>).detail.thumb;
-      if (rating === 'up') {
-        this.google.thumb.turnRatingThumb('down');
-        this.llama.thumb.turnRatingThumb('down');
-      }
-    });
-    this.google.addEventListener(ratingEventName, event => {
-      const rating = (event as CustomEvent<RatingEvent>).detail.thumb;
-      if (rating === 'up') {
-        this.openai.thumb.turnRatingThumb('down');
-        this.llama.thumb.turnRatingThumb('down');
-      }
-    });
-    this.llama.addEventListener(ratingEventName, event => {
-      const rating = (event as CustomEvent<RatingEvent>).detail.thumb;
-      if (rating === 'up') {
-        this.openai.thumb.turnRatingThumb('down');
-        this.google.thumb.turnRatingThumb('down');
-      }
-    });
 
     const query = getElement<HTMLInputElement>('.query', {from: this});
     query.addEventListener('keyup', event => {
@@ -66,32 +32,12 @@ export class ChatBox extends HTMLElement {
     });
   }
 
-  getStack(stack: api.Stack): ChatBoxStack | undefined {
-    switch (stack) {
-      case 'openai':
-        return this.openai;
-      case 'google':
-        return this.google;
-      case 'llama':
-        return this.llama;
-      default:
-        return undefined;
-    }
-  }
-
-  shuffleStacks() {
-    const newOrder = Array.from(Array(this.all.length), (_, i) => i + 1).map(
-      x => String(x)
-    );
-    shuffleArray(newOrder);
-
-    for (let i = 0; i < newOrder.length; i++) {
-      this.all[i].style.order = newOrder[i];
-    }
+  get stacks(): ChatBoxStack[] {
+    return [...getElementAll<ChatBoxStack>('.stack', {from: this})];
   }
 
   turnFlashingDots(mode: 'visible' | 'hidden') {
-    for (const stack of this.all) {
+    for (const stack of this.stacks) {
       stack.turnFlashingDots(mode);
     }
   }
@@ -108,19 +54,19 @@ export class ChatBox extends HTMLElement {
   }
 
   addMyMessage({sender, message}: {sender: string; message: string}) {
-    for (const stack of this.all) {
+    for (const stack of this.stacks) {
       stack.addMyMessage({sender, message});
     }
   }
 
   addTheirMessage({sender, message}: {sender: string; message: string}) {
-    for (const stack of this.all) {
+    for (const stack of this.stacks) {
       stack.addTheirMessage({sender, message});
     }
   }
 
   clearMessage() {
-    for (const stack of this.all) {
+    for (const stack of this.stacks) {
       stack.clearMessage();
     }
   }
@@ -129,24 +75,33 @@ customElements.define('chat-box', ChatBox);
 
 /// Events: RatingEvent
 export class ChatBoxStack extends HTMLElement {
-  readonly thumb: RatingThumbs;
-
   constructor() {
     super();
     loadTemplate('#chat-box-stack', {into: this});
 
-    this.thumb = getElement<RatingThumbs>('.rating', {from: this});
+    this.buildStackOptions();
+
+    const stack = this.getAttribute('stack');
+    if (stack !== null) {
+      this.stack = stack as api.Stack;
+    }
+  }
+
+  get stack(): api.Stack | undefined {
+    const stack = getElement<HTMLInputElement>('.stack-options', {from: this});
+    if (stack.value === '') return undefined;
+    return stack.value as api.Stack;
+  }
+
+  set stack(s: api.Stack | undefined) {
+    const stack = getElement<HTMLInputElement>('.stack-options', {from: this});
+    if (s === undefined) stack.value = '';
+    stack.value = s as string;
   }
 
   turnFlashingDots(mode: 'visible' | 'hidden') {
     const dots = getElement('.flashing-dots', {from: this});
-    if (mode === 'visible') {
-      this.thumb.style.visibility = 'hidden';
-    }
     dots.style.visibility = mode;
-    if (mode === 'hidden') {
-      this.thumb.style.visibility = 'visible';
-    }
   }
 
   addMyMessage({sender, message}: {sender: string; message: string}) {
@@ -176,6 +131,17 @@ export class ChatBoxStack extends HTMLElement {
   clearMessage() {
     const ul = getElement('.messages', {from: this});
     ul.innerHTML = '';
+  }
+
+  private buildStackOptions() {
+    const select = getElement<HTMLInputElement>('.stack-options', {from: this});
+    for (const stack of api.stacks) {
+      const option = document.createElement('option') as HTMLOptionElement;
+      option.value = stack as string;
+      option.text = api.stackNames[stack];
+
+      select.appendChild(option);
+    }
   }
 }
 customElements.define('chat-box-stack', ChatBoxStack);
@@ -210,10 +176,3 @@ export class ChatBoxTheirMessage extends ChatBoxMessage {
   }
 }
 customElements.define('chat-box-their-message', ChatBoxTheirMessage);
-
-function shuffleArray(array: unknown[]) {
-  for (let i = array.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [array[i], array[j]] = [array[j], array[i]];
-  }
-}

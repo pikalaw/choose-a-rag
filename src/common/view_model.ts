@@ -2,19 +2,27 @@ import {fromEvent, Observable} from 'rxjs';
 import {filter, map, startWith} from 'rxjs/operators';
 import showdown from 'showdown';
 
-export function getElement<T extends HTMLElement>(
+export function getElementAll<T extends HTMLElement>(
   selector: string,
   {from}: {from: HTMLElement | Document}
-): T {
+): NodeListOf<T> {
   const p = from instanceof HTMLElement ? from.shadowRoot : from;
   if (!p) {
     throw new Error(`${selector} has no shadow root`);
   }
-  const element = p.querySelector<T>(selector);
-  if (!element) {
+  const element = p.querySelectorAll<T>(selector);
+  if (element.length === 0) {
     throw new Error(`no element found for ${selector}`);
   }
   return element;
+}
+
+export function getElement<T extends HTMLElement>(
+  selector: string,
+  {from}: {from: HTMLElement | Document}
+): T {
+  const elements = getElementAll<T>(selector, {from});
+  return elements[0];
 }
 
 export function loadTemplate(selector: string, {into}: {into: HTMLElement}) {

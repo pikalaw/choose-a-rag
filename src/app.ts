@@ -1,5 +1,5 @@
 import './chat_box.js';
-import {ChatBox, QueryEvent, queryEventName} from './chat_box.js';
+import {ChatBox, ChatBoxStack, QueryEvent, queryEventName} from './chat_box.js';
 import {getElement} from './common/view_model.js';
 import * as api from './api.js';
 
@@ -14,24 +14,25 @@ chatBox.addEventListener(queryEventName, async event => {
   chatBox.turnQueryBox('disabled', 'Running...');
 
   const query = (event as CustomEvent<QueryEvent>).detail.text;
-  await Promise.all([
-    ask({stack: 'google', query}),
-    ask({stack: 'llama', query}),
-    ask({stack: 'openai', query}),
-  ]);
+  await Promise.all(
+    chatBox.stacks.map(chatBoxStack => ask({chatBoxStack, query}))
+  );
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
 });
 
 async function ask({
-  stack,
+  chatBoxStack,
   query,
 }: {
-  stack: api.Stack;
+  chatBoxStack: ChatBoxStack;
   query: string;
 }): Promise<void> {
-  const chatBoxStack = chatBox.getStack(stack)!;
+  const stack = chatBoxStack.stack;
+  if (stack === undefined) return;
+
   chatBoxStack.turnFlashingDots('visible');
+  chatBoxStack.clearMessage();
   chatBoxStack.addMyMessage({sender: 'User', message: query});
   try {
     const answers = await api.addConversation({
@@ -43,7 +44,6 @@ async function ask({
         sender: 'Google',
         message: answer.answer,
       });
-      /*
       if (
         answer.citations !== undefined &&
         answer.citations !== null &&
@@ -60,7 +60,6 @@ async function ask({
           message: String(answer.score),
         });
       }
-      */
     }
   } catch (error) {
     console.error(error);
@@ -100,12 +99,14 @@ function updateFileList({
 
 async function startAll() {
   chatBox.turnQueryBox('disabled', 'Starting...');
-  await Promise.all([start('google'), start('llama'), start('openai')]);
+  await Promise.all(chatBox.stacks.map(chatBoxStack => start(chatBoxStack)));
   chatBox.turnQueryBox('enabled', welcomeMessage);
 }
 
-async function start(stack: api.Stack) {
-  const chatBoxStack = chatBox.getStack(stack)!;
+async function start(chatBoxStack: ChatBoxStack) {
+  const stack = chatBoxStack.stack;
+  if (stack === undefined) return;
+
   chatBoxStack.turnFlashingDots('visible');
   try {
     await api.get({stack});
