@@ -6,7 +6,7 @@ files = [
 ]
 
 [tool.poetry]
-name = "chatgpt-assistant"
+name = "choose-a-rag"
 version = "0.1.0"
 description = ""
 authors = ["Lawrence Tsang <pikalaw@gmail.com>"]
