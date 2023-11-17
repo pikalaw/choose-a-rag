@@ -51,20 +51,27 @@ stack_types: dict[StackId, Type[BaseRag]] = {
   "google": GoogleRag,
   "llama": LlamaRag,
 }
-stacks: dict[StackId, BaseRag] = {
-  stack: cls.get() for stack, cls in stack_types.items()
+stacks: dict[StackId, BaseRag | None] = {
+  stack: None for stack in stack_types.keys()
 }
+
+
+def get_stack(stack: str) -> BaseRag:
+  s = stacks[stack]
+  if s is None:
+    raise RuntimeError(f"Stack {stack} hasn't been loaded yet")
+  return s
 
 
 @app.post('/api/{stack}/new')
 async def new_stack(stack: str) -> None:
   # We just reuse an existing one.
-  stacks[stack] = await stack_types[stack].get()
+  stacks[stack] = await stack_types[stack].get_default()
 
 
 @app.get('/api/{stack}/list-files')
 async def list_file(stack: str) -> List[str]:
-  return list(await stacks[stack].list_files())
+  return list(await get_stack(stack).list_files())
 
 
 @app.post('/api/{stack}/add-files')
@@ -72,7 +79,7 @@ async def add_file(stack: str, files: List[UploadFile]) -> None:
   for file in files:
     assert file.filename is not None
     assert file.content_type is not None
-    await stacks[stack].add_file(
+    await get_stack(stack).add_file(
         filename=file.filename,
         content=file.file,
         content_type=file.content_type)
@@ -80,17 +87,17 @@ async def add_file(stack: str, files: List[UploadFile]) -> None:
 
 @app.post('/api/{stack}/clear-files')
 async def clear_files(stack: str) -> None:
-  await stacks[stack].clear_files()
+  await get_stack(stack).clear_files()
 
 
 @app.post('/api/{stack}/add-conversation')
 async def add_conversation(stack: str, message: UserMessage) -> List[AttributedAnswer]:
-  return list(await stacks[stack].add_conversation(message.text))
+  return list(await get_stack(stack).add_conversation(message.text))
 
 
 @app.post('/api/{stack}/clear-conversation')
 async def clear_conversation(stack: str) -> None:
-  await stacks[stack].clear_conversation()
+  await get_stack(stack).clear_conversation()
 
 
 app.mount("/", StaticFiles(directory="dist", html=True), name="webapp")

@@ -31,10 +31,6 @@ body {
   justify-content: space-between;
 }
 
-.loaded-files-subsection {
-  flex: 1;
-}
-
 .file-control {
   display: flex;
 }

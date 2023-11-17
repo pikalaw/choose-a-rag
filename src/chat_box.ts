@@ -14,6 +14,13 @@ export interface QueryEvent {
   text: string;
 }
 
+/// stack change event.
+export const stackChangeEventName = 'stack-change';
+export interface StackChangeEvent {
+  new_stack: api.Stack | undefined;
+  target: ChatBoxStack;
+}
+
 export class ChatBox extends HTMLElement {
   constructor() {
     super();
@@ -73,7 +80,7 @@ export class ChatBox extends HTMLElement {
 }
 customElements.define('chat-box', ChatBox);
 
-/// Events: RatingEvent
+/// Events: RatingEvent, StackChangeEvent.
 export class ChatBoxStack extends HTMLElement {
   constructor() {
     super();
@@ -85,6 +92,17 @@ export class ChatBoxStack extends HTMLElement {
     if (stack !== null) {
       this.stack = stack as api.Stack;
     }
+
+    const select = getElement<HTMLInputElement>('.stack-options', {from: this});
+    select.addEventListener('change', () => {
+      this.dispatchEvent(
+        new CustomEvent<StackChangeEvent>(stackChangeEventName, {
+          detail: {new_stack: this.stack, target: this},
+          bubbles: true,
+          composed: true,
+        })
+      );
+    });
   }
 
   get stack(): api.Stack | undefined {
@@ -131,6 +149,24 @@ export class ChatBoxStack extends HTMLElement {
   clearMessage() {
     const ul = getElement('.messages', {from: this});
     ul.innerHTML = '';
+  }
+
+  updateFileList(filenames: string[]) {
+    const div = getElement<HTMLElement>('.file-list', {from: this});
+    div.innerHTML = filenames
+      .sort((a, b) => {
+        const lowerCaseA = a.toLowerCase();
+        const lowerCaseB = b.toLowerCase();
+        if (lowerCaseA < lowerCaseB) {
+          return -1;
+        }
+        if (lowerCaseA > lowerCaseB) {
+          return 1;
+        }
+        return 0;
+      })
+      .map(fn => `<li>${fn}</li>`)
+      .join('\n');
   }
 
   private buildStackOptions() {

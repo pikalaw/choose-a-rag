@@ -36,6 +36,10 @@ class GoogleRag(BaseRag):
     self._query_engine = client.as_query_engine()
 
   @classmethod
+  async def get_default(cls) -> "BaseRag":
+    return await cls.get(corpus_id="ltsang-google")
+
+  @classmethod
   async def create(cls, *, corpus_id: str, display_name: str) -> "GoogleRag":
     return await asyncio.to_thread(
         lambda: cls._create(

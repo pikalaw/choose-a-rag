@@ -1,5 +1,12 @@
 import './chat_box.js';
-import {ChatBox, ChatBoxStack, QueryEvent, queryEventName} from './chat_box.js';
+import {
+  ChatBox,
+  ChatBoxStack,
+  QueryEvent,
+  queryEventName,
+  StackChangeEvent,
+  stackChangeEventName,
+} from './chat_box.js';
 import {getElement} from './common/view_model.js';
 import * as api from './api.js';
 
@@ -73,28 +80,87 @@ async function ask({
   chatBoxStack.turnFlashingDots('hidden');
 }
 
-function updateFileList({
-  host,
-  filenames,
-}: {
-  host: string;
-  filenames: string[];
-}) {
-  const div = getElement<HTMLElement>(`.file-list.${host}`, {from: document});
-  div.innerHTML = filenames
-    .sort((a, b) => {
-      const lowerCaseA = a.toLowerCase();
-      const lowerCaseB = b.toLowerCase();
-      if (lowerCaseA < lowerCaseB) {
-        return -1;
-      }
-      if (lowerCaseA > lowerCaseB) {
-        return 1;
-      }
-      return 0;
-    })
-    .map(fn => `<li>${fn}</li>`)
-    .join('\n');
+chatBox.addEventListener(stackChangeEventName, async event => {
+  chatBox.turnQueryBox('disabled', 'Starting...');
+
+  const stack = (event as CustomEvent<StackChangeEvent>).detail.target;
+  stack.clearMessage();
+  await start(stack);
+
+  chatBox.turnQueryBox('enabled', welcomeMessage);
+});
+
+const fileUpload = getElement<HTMLInputElement>('#files', {from: document});
+fileUpload.addEventListener('change', async () => {
+  chatBox.turnQueryBox('disabled', 'Ingesting files...');
+
+  const files = fileUpload.files;
+  if (files !== null) {
+    for (const chatBoxStack of chatBox.stacks) {
+      await uploadFile(chatBoxStack, files);
+    }
+  }
+
+  chatBox.turnQueryBox('enabled', welcomeMessage);
+});
+
+async function uploadFile(
+  chatBoxStack: ChatBoxStack,
+  files: FileList
+): Promise<void> {
+  const stack = chatBoxStack.stack;
+  if (stack === undefined) return;
+
+  chatBoxStack.turnFlashingDots('visible');
+  try {
+    await api.addFiles({stack, files});
+    chatBoxStack.updateFileList(await api.listFiles({stack}));
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBoxStack.addTheirMessage({
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
+  chatBoxStack.turnFlashingDots('hidden');
+}
+
+const deleteFilesButton = getElement<HTMLInputElement>('.delete-files-button', {
+  from: document,
+});
+deleteFilesButton.addEventListener('click', async () => {
+  if (!confirm('Are you sure you want to delete all files?')) {
+    return;
+  }
+  chatBox.turnQueryBox('disabled', 'Clearing files...');
+
+  await Promise.all(
+    chatBox.stacks.map(chatBoxStack => clearFiles(chatBoxStack))
+  );
+
+  chatBox.turnQueryBox('enabled', welcomeMessage);
+});
+
+async function clearFiles(chatBoxStack: ChatBoxStack) {
+  const stack = chatBoxStack.stack;
+  if (stack === undefined) return;
+
+  chatBoxStack.turnFlashingDots('visible');
+  try {
+    await api.clearFiles({stack});
+    chatBoxStack.updateFileList(await api.listFiles({stack}));
+  } catch (error) {
+    console.error(error);
+    if (error instanceof Error) {
+      chatBoxStack.addTheirMessage({
+        sender: 'SYSTEM',
+        message: error.message,
+      });
+    }
+  }
+  chatBoxStack.turnFlashingDots('hidden');
 }
 
 async function startAll() {
@@ -110,6 +176,7 @@ async function start(chatBoxStack: ChatBoxStack) {
   chatBoxStack.turnFlashingDots('visible');
   try {
     await api.get({stack});
+    chatBoxStack.updateFileList(await api.listFiles({stack}));
   } catch (error) {
     console.error(error);
     if (error instanceof Error) {

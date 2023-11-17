@@ -129,6 +129,10 @@ class LlamaRag(BaseRag):
     self._query_engine = query_engine
 
   @classmethod
+  async def get_default(cls) -> "BaseRag":
+    return await cls.get(corpus_id="ltsang-llama-1")
+
+  @classmethod
   async def create(cls, *, corpus_id: str, display_name: str) -> "LlamaRag":
     return await asyncio.to_thread(
         lambda: cls._create(corpus_id=corpus_id, display_name=display_name)

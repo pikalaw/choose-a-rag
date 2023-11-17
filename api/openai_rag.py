@@ -28,6 +28,10 @@ class OpenaiRag(BaseRag):
     self._thread = thread
 
   @classmethod
+  async def get_default(cls) -> "BaseRag":
+    return await cls.get(assistant_id="asst_4It75FJXgCNPyLn5I4nul0LG")
+
+  @classmethod
   async def create(cls) -> "OpenaiRag":
     client = AsyncOpenAI()
     assistant = await client.beta.assistants.create(
@@ -43,7 +47,7 @@ class OpenaiRag(BaseRag):
     return cls(client, assistant, thread)
 
   @classmethod
-  async def get(cls, assistant_id: str = "asst_4It75FJXgCNPyLn5I4nul0LG") -> "OpenaiRag":
+  async def get(cls, *, assistant_id: str) -> "OpenaiRag":
     client = AsyncOpenAI()
     assistant = await client.beta.assistants.retrieve(assistant_id)
     thread = await client.beta.threads.create()

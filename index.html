@@ -17,7 +17,6 @@
     <div class="stacks">
       <chat-box-stack class="stack" stack="openai"></chat-box-stack>
       <chat-box-stack class="stack" stack="google"></chat-box-stack>
-      <chat-box-stack class="stack"></chat-box-stack>
     </div>
     <form class="chat">
       <textarea class="query" rows="4" placeholder="Chat with me"></textarea>
@@ -32,6 +31,10 @@
     <ul class="messages"></ul>
     <div class="signals">
       <flashing-dots class="flashing-dots"></flashing-dots>
+    </div>
+    <div class="loaded-files">
+      Loaded files:
+      <ol class="file-list"></ol>
     </div>
   </template>
 
@@ -81,8 +84,9 @@
         <label for="files">New files:</label>
         <input name="files" id="files" type="file" multiple>
         <div class="space-filler">&nbsp;</div>
-      </div>
-      <div class="loaded-files-section">
+        <button type="button" class="delete-files-button">
+          Delete all files
+        </button>
       </div>
     </div>
   </div>
