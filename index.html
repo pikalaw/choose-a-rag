@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="style/chat_box.css" />
     <div class="stacks">
       <chat-box-stack class="stack" stack="openai"></chat-box-stack>
+      <div>vs.</div>
       <chat-box-stack class="stack" stack="google"></chat-box-stack>
     </div>
     <form class="chat">
@@ -73,11 +74,10 @@
     <div class="main-view">
       <h1>Who is the best RAG?</h1>
       <p>
-        <em class="important">
-          Note that this is a shared instance.
-          All files you upload will be seen by everyone!
-          Do not upload personal files!
-        </em>
+        In general, your query is sent to both stacks.
+        However, if you prefix it with <span class="highlight">&lt;</span>,
+        it will be sent to the left stack only.
+        With <span class="highlight">&gt;</span>, the right stack only.
       </p>
       <chat-box class="chat-box"></chat-box>
       <div class="file-control">

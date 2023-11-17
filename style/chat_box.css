@@ -17,6 +17,10 @@
   flex: 1;
 }
 
+.stack-options {
+  height: 2em;
+}
+
 .name {
   flex: 1;
 }

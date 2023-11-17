@@ -9,6 +9,7 @@ import {
 } from './chat_box.js';
 import {getElement} from './common/view_model.js';
 import * as api from './api.js';
+import {text} from 'stream/consumers';
 
 const welcomeMessage = 'How can I help?';
 
@@ -21,9 +22,21 @@ chatBox.addEventListener(queryEventName, async event => {
   chatBox.turnQueryBox('disabled', 'Running...');
 
   const query = (event as CustomEvent<QueryEvent>).detail.text;
-  await Promise.all(
-    chatBox.stacks.map(chatBoxStack => ask({chatBoxStack, query}))
-  );
+  if (query.startsWith('<')) {
+    await ask({
+      chatBoxStack: chatBox.stacks.at(0)!,
+      query: query.substring(1).trim(),
+    });
+  } else if (query.startsWith('>')) {
+    await ask({
+      chatBoxStack: chatBox.stacks.at(-1)!,
+      query: query.substring(1).trim(),
+    });
+  } else {
+    await Promise.all(
+      chatBox.stacks.map(chatBoxStack => ask({chatBoxStack, query}))
+    );
+  }
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
 });
@@ -48,7 +61,7 @@ async function ask({
     });
     for (const answer of answers) {
       chatBoxStack.addTheirMessage({
-        sender: 'Google',
+        sender: api.stackNames[stack],
         message: answer.answer,
       });
       if (

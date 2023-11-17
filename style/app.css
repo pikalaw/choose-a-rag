@@ -40,7 +40,7 @@ body {
   flex: 1;
 }
 
-.important {
+.highlight {
   color: red;
   font-weight: bold;
 }
