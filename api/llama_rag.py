@@ -120,6 +120,7 @@ class LlamaRag(BaseRag):
         response_synthesizer=response_synthesizer)
     step_decompose_transform = StepDecomposeQueryTransform(
         LLMPredictor(llm=OpenAI(model="gpt-4-1106-preview")),
+        #LLMPredictor(llm=PaLM()),
         step_decompose_query_prompt=_STEP_DECOMPOSE_QUERY_TRANSFORM_PROMPT,
         verbose=True)
     query_engine = MultiStepQueryEngine(

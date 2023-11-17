@@ -43,7 +43,7 @@ export async function addFiles({
   files,
 }: {
   stack: Stack;
-  files: FileList;
+  files: FileList | File[];
 }): Promise<void> {
   const formData = new FormData();
   for (let i = 0; i < files.length; i++) {

@@ -111,9 +111,12 @@ async function uploadFile(
   const stack = chatBoxStack.stack;
   if (stack === undefined) return;
 
+  const newFiles = await getNewFiles(stack, files);
+  if (newFiles.length === 0) return;
+
   chatBoxStack.turnFlashingDots('visible');
   try {
-    await api.addFiles({stack, files});
+    await api.addFiles({stack, files: newFiles});
     chatBoxStack.updateFileList(await api.listFiles({stack}));
   } catch (error) {
     console.error(error);
@@ -125,6 +128,22 @@ async function uploadFile(
     }
   }
   chatBoxStack.turnFlashingDots('hidden');
+}
+
+async function getNewFiles(stack: api.Stack, files: FileList): Promise<File[]> {
+  const existingFiles = await api.listFiles({stack});
+
+  const newFiles: File[] = [];
+  for (const file of files) {
+    if (existingFiles.includes(file.name)) {
+      console.warn(
+        `Stack ${stack} already has file ${file.name}. Skip loading it again.`
+      );
+      continue;
+    }
+    newFiles.push(file);
+  }
+  return newFiles;
 }
 
 const deleteFilesButton = getElement<HTMLInputElement>('.delete-files-button', {
