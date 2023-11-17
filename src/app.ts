@@ -83,12 +83,23 @@ async function ask({
 chatBox.addEventListener(stackChangeEventName, async event => {
   chatBox.turnQueryBox('disabled', 'Starting...');
 
+  updateStackInUrl();
+
   const stack = (event as CustomEvent<StackChangeEvent>).detail.target;
   stack.clearMessage();
   await start(stack);
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
 });
+
+function updateStackInUrl() {
+  const url = new URL(window.location.href);
+  url.searchParams.delete('stack');
+  for (const stack of chatBox.stacks) {
+    url.searchParams.append('stack', stack.stack as string);
+  }
+  window.history.pushState({}, '', url);
+}
 
 const fileUpload = getElement<HTMLInputElement>('#files', {from: document});
 fileUpload.addEventListener('change', async () => {
@@ -184,8 +195,20 @@ async function clearFiles(chatBoxStack: ChatBoxStack) {
 
 async function startAll() {
   chatBox.turnQueryBox('disabled', 'Starting...');
+
+  setChatBoxStacksFromUrl();
   await Promise.all(chatBox.stacks.map(chatBoxStack => start(chatBoxStack)));
+
   chatBox.turnQueryBox('enabled', welcomeMessage);
+}
+
+function setChatBoxStacksFromUrl() {
+  const url = new URL(window.location.href);
+  const stackIds = url.searchParams.getAll('stack');
+  for (let i = 0; i < chatBox.stacks.length; i++) {
+    if (i >= stackIds.length) break;
+    chatBox.stacks[i].stack = stackIds[i] as api.Stack;
+  }
 }
 
 async function start(chatBoxStack: ChatBoxStack) {

@@ -18,6 +18,16 @@
   },
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "targets": {
+    "default": {
+      "engines": {
+        "browsers": ">= 50%"
+      }
+    }
+  },
   "devDependencies": {
     "@types/node": "20.8.2",
     "@types/showdown": "^2.0.4",
