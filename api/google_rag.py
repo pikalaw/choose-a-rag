@@ -38,7 +38,14 @@ class GoogleRag(BaseRag):
 
   @classmethod
   async def get_default(cls) -> "BaseRag":
-    return await cls.get(corpus_id="ltsang-google")
+    default_corpus_id = "ltsang-google"
+    try:
+      return await cls.get(corpus_id=default_corpus_id)
+    except NoSuchCorpusException:
+      _logger.warning(f"Cannot find corpus {default_corpus_id}. Creating it.")
+      return await GoogleRag.create(
+          corpus_id=default_corpus_id,
+          display_name="RAG comparision with plain Google")
 
   @classmethod
   async def create(cls, *, corpus_id: str, display_name: str) -> "GoogleRag":
@@ -57,13 +64,7 @@ class GoogleRag(BaseRag):
 
   @classmethod
   def _get(cls, *, corpus_id: str) -> "GoogleRag":
-    try:
-      return cls(GoogleIndex.from_corpus(corpus_id=corpus_id))
-    except NoSuchCorpusException as e:
-      _logger.warning(f"Cannot find corpus {corpus_id}: {e}. Creating it.")
-      return GoogleRag._create(
-          corpus_id=corpus_id,
-          display_name="RAG comparision with plain Google")
+    return cls(GoogleIndex.from_corpus(corpus_id=corpus_id))
 
   async def list_files(self) -> Iterable[str]:
     return await asyncio.to_thread(lambda: self._list_files())

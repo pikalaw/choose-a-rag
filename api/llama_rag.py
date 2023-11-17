@@ -135,7 +135,15 @@ class LlamaRag(BaseRag):
 
   @classmethod
   async def get_default(cls) -> "BaseRag":
-    return await cls.get(corpus_id="ltsang-llama-1")
+    default_corpus_id = "ltsang-llama-1"
+    try:
+      return await cls.get(corpus_id=default_corpus_id)
+    except NoSuchCorpusException:
+      _logger.warning(f"Cannot find corpus {default_corpus_id}. Creating it.")
+      return LlamaRag._create(
+          corpus_id=default_corpus_id,
+          display_name="RAG comparision with LlamaIndex"
+      )
 
   @classmethod
   async def create(cls, *, corpus_id: str, display_name: str) -> "LlamaRag":
@@ -157,14 +165,7 @@ class LlamaRag(BaseRag):
 
   @classmethod
   def _get(cls, *, corpus_id: str) -> "LlamaRag":
-    try:
-      return cls(GoogleVectorStore.from_corpus(corpus_id=corpus_id))
-    except NoSuchCorpusException as e:
-      _logger.warning(f"Cannot find corpus {corpus_id}: {e}. Creating it.")
-      return LlamaRag._create(
-          corpus_id=corpus_id,
-          display_name="RAG comparision with LlamaIndex"
-      )
+    return cls(GoogleVectorStore.from_corpus(corpus_id=corpus_id))
 
   async def list_files(self) -> Iterable[str]:
     return await asyncio.to_thread(lambda: self._list_files())
