@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 import logging
 from pydantic import BaseModel
-from typing import Any, List, Literal, Type
+from typing import Any, cast, List, Literal, Type
 from .base_rag import AttributedAnswer, BaseRag
 from .google_rag import GoogleRag
 from .llama_rag import LlamaRag
@@ -32,9 +32,14 @@ app.add_middleware(
 
 @app.exception_handler(Exception)
 async def exception_handler(request: Request, exc: Any) -> JSONResponse:
+    if hasattr(exc, "message"):
+      message = exc.message
+    else:
+      message = str(exc)
+
     return JSONResponse(
         status_code=500,
-        content={"message": exc.message},
+        content={"message": message},
         headers={
             "Access-Control-Allow-Origin": "*",
         }
@@ -57,16 +62,25 @@ stacks: dict[StackId, BaseRag | None] = {
 
 
 def get_stack(stack: str) -> BaseRag:
-  s = stacks[stack]
+  s = stacks[cast(StackId, stack)]
   if s is None:
     raise RuntimeError(f"Stack {stack} hasn't been loaded yet")
   return s
 
 
+def set_stack(stack: str, instance: BaseRag) -> None:
+  stacks[cast(StackId, stack)] = instance
+
+
 @app.post('/api/{stack}/new')
 async def new_stack(stack: str) -> None:
+  s = cast(StackId, stack)
+  t = stack_types[s]
+  if t is None:
+    raise RuntimeError(f"Stack type {stack} is unknown")
+
   # We just reuse an existing one.
-  stacks[stack] = await stack_types[stack].get_default()
+  stacks[s] = await t.get_default()
 
 
 @app.get('/api/{stack}/list-files')

@@ -3,10 +3,14 @@ from llama_index import (
     LLMPredictor,
     VectorStoreIndex,
 )
+from llama_index.llms import OpenAI
 import llama_index.vector_stores.google.generativeai.genai_extension as genaix
 from llama_index.vector_stores.google.generativeai import (
     GoogleVectorStore,
     google_service_context,
+)
+from llama_index.vector_stores.google.generativeai.base import (
+    NoSuchCorpusException,
 )
 from llama_index.indices.query.base import BaseQueryEngine
 from llama_index.indices.query.query_transform.base import (
@@ -115,7 +119,7 @@ class LlamaRag(BaseRag):
     single_step_query_engine = index.as_query_engine(
         response_synthesizer=response_synthesizer)
     step_decompose_transform = StepDecomposeQueryTransform(
-        LLMPredictor(llm=PaLM()),
+        LLMPredictor(llm=OpenAI(model="gpt-4-1106-preview")),
         step_decompose_query_prompt=_STEP_DECOMPOSE_QUERY_TRANSFORM_PROMPT,
         verbose=True)
     query_engine = MultiStepQueryEngine(
@@ -154,7 +158,7 @@ class LlamaRag(BaseRag):
   def _get(cls, *, corpus_id: str) -> "LlamaRag":
     try:
       return cls(GoogleVectorStore.from_corpus(corpus_id=corpus_id))
-    except Exception as e:
+    except NoSuchCorpusException as e:
       _logger.warning(f"Cannot find corpus {corpus_id}: {e}. Creating it.")
       return LlamaRag._create(
           corpus_id=corpus_id,

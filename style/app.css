@@ -33,6 +33,7 @@ body {
 
 .file-control {
   display: flex;
+  margin-bottom: 1em;
 }
 
 .space-filler {

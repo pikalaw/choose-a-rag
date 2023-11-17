@@ -1,6 +1,7 @@
 import asyncio
 import llama_index.vector_stores.google.generativeai.genai_extension as genaix
 from llama_index.indices.managed.google.generativeai import GoogleIndex
+from llama_index.vector_stores.google.generativeai.base import NoSuchCorpusException
 from llama_index.indices.query.base import BaseQueryEngine
 from llama_index.response.schema import Response
 from llama_index.schema import NodeRelationship, RelatedNodeInfo, TextNode
@@ -51,16 +52,14 @@ class GoogleRag(BaseRag):
         corpus_id=corpus_id, display_name=display_name))
 
   @classmethod
-  async def get(
-      cls, *, corpus_id: str = "ltsang-google"
-  ) -> "GoogleRag":
+  async def get(cls, *, corpus_id: str) -> "GoogleRag":
     return await asyncio.to_thread(lambda: cls._get(corpus_id=corpus_id))
 
   @classmethod
   def _get(cls, *, corpus_id: str) -> "GoogleRag":
     try:
       return cls(GoogleIndex.from_corpus(corpus_id=corpus_id))
-    except Exception as e:
+    except NoSuchCorpusException as e:
       _logger.warning(f"Cannot find corpus {corpus_id}: {e}. Creating it.")
       return GoogleRag._create(
           corpus_id=corpus_id,
