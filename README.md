@@ -1,4 +1,4 @@
-# chatgpt-assistant
+# Choose-a-RAG
 
 ## After cloning the repo
 
