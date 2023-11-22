@@ -115,7 +115,7 @@ class LlamaRag(BaseRag):
     index = VectorStoreIndex.from_vector_store(
         vector_store=store,
         service_context=google_service_context)
-    response_synthesizer = GoogleTextSynthesizer()
+    response_synthesizer = GoogleTextSynthesizer.create()
     single_step_query_engine = index.as_query_engine(
         response_synthesizer=response_synthesizer)
     step_decompose_transform = StepDecomposeQueryTransform(
