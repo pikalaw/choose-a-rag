@@ -3,14 +3,11 @@ from llama_index import (
     LLMPredictor,
     VectorStoreIndex,
 )
-from llama_index.llms import OpenAI
+from llama_index.llms.base import LLM
 import llama_index.vector_stores.google.generativeai.genai_extension as genaix
 from llama_index.vector_stores.google.generativeai import (
     GoogleVectorStore,
     google_service_context,
-)
-from llama_index.vector_stores.google.generativeai.base import (
-    NoSuchCorpusException,
 )
 from llama_index.indices.query.base import BaseQueryEngine
 from llama_index.indices.query.query_transform.base import (
@@ -32,8 +29,7 @@ from tempfile import SpooledTemporaryFile
 from typing import Iterable, List, Literal
 from unstructured.partition.auto import partition  # type: ignore
 import uuid
-from .base_rag import AttributedAnswer, BaseRag
-from .llms import PaLM
+from ..base_rag import AttributedAnswer, BaseRag
 
 
 _logger = logging.getLogger(__name__)
@@ -46,6 +42,7 @@ class ConversationMessage(BaseModel):
   message: AttributedAnswer
 
 
+DEFAULT_CORPUS_ID = "ltsang-unstructured"
 _STEP_DECOMPOSE_QUERY_TRANSFORM_TMPL = (
     "The original question is as follows: {query_str}\n"
     "We have an opportunity to answer some, or all of the question from a "
@@ -103,13 +100,13 @@ _STEP_DECOMPOSE_QUERY_TRANSFORM_TMPL = (
 _STEP_DECOMPOSE_QUERY_TRANSFORM_PROMPT = PromptTemplate(
   _STEP_DECOMPOSE_QUERY_TRANSFORM_TMPL)
 
-class LlamaRag(BaseRag):
+class MultiQueryBaseRag(BaseRag):
   _store: GoogleVectorStore = PrivateAttr()
   _query_engine: BaseQueryEngine = PrivateAttr()
 
   conversation: List[ConversationMessage] = []
 
-  def __init__(self, store: GoogleVectorStore) -> None:
+  def __init__(self, *, store: GoogleVectorStore, llm: LLM) -> None:
     super().__init__()
 
     index = VectorStoreIndex.from_vector_store(
@@ -119,8 +116,7 @@ class LlamaRag(BaseRag):
     single_step_query_engine = index.as_query_engine(
         response_synthesizer=response_synthesizer)
     step_decompose_transform = StepDecomposeQueryTransform(
-        LLMPredictor(llm=OpenAI(model="gpt-4-1106-preview")),
-        #LLMPredictor(llm=PaLM()),
+        LLMPredictor(llm=llm),
         step_decompose_query_prompt=_STEP_DECOMPOSE_QUERY_TRANSFORM_PROMPT,
         verbose=True)
     query_engine = MultiStepQueryEngine(
@@ -134,38 +130,34 @@ class LlamaRag(BaseRag):
     self._query_engine = query_engine
 
   @classmethod
-  async def get_default(cls) -> "BaseRag":
-    default_corpus_id = "ltsang-llama-1"
-    try:
-      return await cls.get(corpus_id=default_corpus_id)
-    except NoSuchCorpusException:
-      _logger.warning(f"Cannot find corpus {default_corpus_id}. Creating it.")
-      return LlamaRag._create(
-          corpus_id=default_corpus_id,
-          display_name="RAG comparision with LlamaIndex"
-      )
-
-  @classmethod
-  async def create(cls, *, corpus_id: str, display_name: str) -> "LlamaRag":
+  async def create(
+      cls, *, corpus_id: str, display_name: str, llm: LLM
+  ) -> BaseRag:
     return await asyncio.to_thread(
-        lambda: cls._create(corpus_id=corpus_id, display_name=display_name)
+        lambda: cls._create(
+            corpus_id=corpus_id, display_name=display_name, llm=llm)
     )
 
   @classmethod
-  def _create(cls, *, corpus_id: str, display_name: str) -> "LlamaRag":
+  def _create(
+      cls, *, corpus_id: str, display_name: str, llm: LLM
+  ) -> BaseRag:
     return cls(
-      GoogleVectorStore.create_corpus(
+      store=GoogleVectorStore.create_corpus(
           corpus_id=corpus_id,
-          display_name=display_name)
-    )
+          display_name=display_name),
+      llm=llm)
 
   @classmethod
-  async def get(cls, *, corpus_id: str = "ltsang-llama-1") -> "LlamaRag":
-    return await asyncio.to_thread(lambda: cls._get(corpus_id=corpus_id))
+  async def get(cls, *, corpus_id: str, llm: LLM) -> BaseRag:
+    return await asyncio.to_thread(
+        lambda: cls._get(corpus_id=corpus_id, llm=llm))
 
   @classmethod
-  def _get(cls, *, corpus_id: str) -> "LlamaRag":
-    return cls(GoogleVectorStore.from_corpus(corpus_id=corpus_id))
+  def _get(cls, *, corpus_id: str, llm: LLM) -> BaseRag:
+    return cls(
+        store=GoogleVectorStore.from_corpus(corpus_id=corpus_id),
+        llm=llm)
 
   async def list_files(self) -> Iterable[str]:
     return await asyncio.to_thread(lambda: self._list_files())

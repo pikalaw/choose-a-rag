@@ -6,17 +6,21 @@ export interface AttributedAnswer {
   score?: number;
 }
 
-export type Stack = 'openai' | 'google' | 'llama';
+export type Stack =
+  | 'openai'
+  | 'google'
+  | 'multi-query-gpt4'
+  | 'multi-query-palm';
 export const stackNames: {
   [key in Stack]: string;
 } = {
   openai: 'OpenAI',
   google: 'Google',
-  llama: 'Google + Advanced RAG (LlamaIndex)',
+  'multi-query-gpt4': 'Multi-query with ChatGPT-4',
+  'multi-query-palm': 'Multi-query with PaLM',
 };
 export const stacks = Object.keys(stackNames).map(n => n as Stack);
 
-// openai
 export async function get({stack}: {stack: Stack}): Promise<void> {
   const response = await fetch(`${api}/${stack}/new`, {
     method: 'POST',

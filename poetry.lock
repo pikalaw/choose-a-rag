@@ -1635,7 +1635,7 @@ query-tools = ["guidance (>=0.0.64,<0.0.65)", "jsonpath-ng (>=1.6.0,<2.0.0)", "l
 type = "git"
 url = "https://github.com/pikalaw/llama_index.git"
 reference = "generative_service"
-resolved_reference = "0dfed15d52c8c431a30bf6260d2ce0a43ea36e0a"
+resolved_reference = "8ff9637d12b8dcc07066e692c05590e02567fab2"
 
 [[package]]
 name = "lxml"

@@ -7,7 +7,7 @@ from pydantic import BaseModel
 from typing import Any, cast, List, Literal, Type
 from .base_rag import AttributedAnswer, BaseRag
 from .google_rag import GoogleRag
-from .llama_rag import LlamaRag
+from .multi_query import MultiQueryGpt4Rag, MultiQueryPalmRag
 from .openai_rag import OpenaiRag
 
 
@@ -46,11 +46,17 @@ class UserMessage(BaseModel):
     text: str
 
 
-StackId = Literal["openai", "google", "llama"]
+StackId = Literal[
+    "openai",
+    "google",
+    "multi-query-gpt4",
+    "multi-query-palm",
+]
 stack_types: dict[StackId, Type[BaseRag]] = {
   "openai": OpenaiRag,
   "google": GoogleRag,
-  "llama": LlamaRag,
+  "multi-query-gpt4": MultiQueryGpt4Rag,
+  "multi-query-palm": MultiQueryPalmRag,
 }
 stacks: dict[StackId, BaseRag | None] = {
   stack: None for stack in stack_types.keys()
