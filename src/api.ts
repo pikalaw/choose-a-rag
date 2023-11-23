@@ -9,6 +9,8 @@ export interface AttributedAnswer {
 export type Stack =
   | 'openai'
   | 'google'
+  | 'hyde-gpt4'
+  | 'hyde-palm'
   | 'multi-query-gpt4'
   | 'multi-query-palm';
 export const stackNames: {
@@ -16,6 +18,8 @@ export const stackNames: {
 } = {
   openai: 'OpenAI',
   google: 'Google',
+  'hyde-gpt4': 'HyDE with ChatGPT-4',
+  'hyde-palm': 'HyDE with PaLM',
   'multi-query-gpt4': 'Multi-query with ChatGPT-4',
   'multi-query-palm': 'Multi-query with PaLM',
 };
