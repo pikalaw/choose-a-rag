@@ -20,6 +20,9 @@ _logger.setLevel(logging.INFO)
 _logger.addHandler(logging.StreamHandler())
 
 
+DEFAULT_CORPUS_ID = "ltsang-unstructured"
+
+
 class ConversationMessage(BaseModel):
   role: Literal["assistant", "user"]
   message: AttributedAnswer
@@ -38,7 +41,7 @@ class GoogleRag(BaseRag):
 
   @classmethod
   async def get_default(cls) -> "BaseRag":
-    default_corpus_id = "ltsang-google"
+    default_corpus_id = DEFAULT_CORPUS_ID
     try:
       return await cls.get(corpus_id=default_corpus_id)
     except NoSuchCorpusException:
