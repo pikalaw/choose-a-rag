@@ -10,6 +10,7 @@ from .naive import GoogleRag, OpenaiRag
 from .hyde import HydeGpt4Rag, HydePalmRag
 from .multi_query import MultiQueryGpt4Rag, MultiQueryPalmRag
 from .reranker import RerankerGpt4Rag, RerankerPalmRag
+from .window import WindowGoogleRag
 
 
 app = FastAPI()
@@ -56,6 +57,7 @@ StackId = Literal[
     "multi-query-palm",
     "reranker-gpt4",
     "reranker-palm",
+    "window-google",
 ]
 stack_types: dict[StackId, Type[BaseRag]] = {
   "openai": OpenaiRag,
@@ -66,6 +68,7 @@ stack_types: dict[StackId, Type[BaseRag]] = {
   "multi-query-palm": MultiQueryPalmRag,
   "reranker-gpt4": RerankerGpt4Rag,
   "reranker-palm": RerankerPalmRag,
+  "window-google": WindowGoogleRag,
 }
 stacks: dict[StackId, BaseRag | None] = {
   stack: None for stack in stack_types.keys()
