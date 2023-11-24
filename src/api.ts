@@ -15,7 +15,9 @@ export type Stack =
   | 'multi-query-palm'
   | 'reranker-gpt4'
   | 'reranker-palm'
-  | 'window-google';
+  | 'window-google'
+  | 'everything-gpt4'
+  | 'everything-palm';
 
 export const stackNames: {
   [key in Stack]: string;
@@ -29,6 +31,9 @@ export const stackNames: {
   'reranker-gpt4': 'Reranking with ChatGPT-4',
   'reranker-palm': 'Reranking with PaLM',
   'window-google': 'Windowed markdown with Google',
+  'everything-gpt4':
+    'Multi-query + Reranking + Windowed markdown with ChatGPT-4',
+  'everything-palm': 'Multi-query + Reranking + Windowed markdown with PaLM',
 };
 export const stacks = Object.keys(stackNames).map(n => n as Stack);
 
