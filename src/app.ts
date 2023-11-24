@@ -135,12 +135,15 @@ async function uploadFile(
   const stack = chatBoxStack.stack;
   if (stack === undefined) return;
 
-  const newFiles = await getNewFiles(stack, files);
-  if (newFiles.length === 0) return;
-
   chatBoxStack.turnFlashingDots('visible');
+
   try {
-    await api.addFiles({stack, files: newFiles});
+    const newFiles = await getNewFiles(stack, files);
+    if (newFiles.length > 0) {
+      await api.addFiles({stack, files: newFiles});
+    }
+    // Always update the file list in case a previous stack has updated
+    // this stack's storage.
     chatBoxStack.updateFileList(await api.listFiles({stack}));
   } catch (error) {
     console.error(error);
@@ -151,6 +154,7 @@ async function uploadFile(
       });
     }
   }
+
   chatBoxStack.turnFlashingDots('hidden');
 }
 
