@@ -9,7 +9,6 @@ import {
 } from './chat_box.js';
 import {getElement} from './common/view_model.js';
 import * as api from './api.js';
-import {text} from 'stream/consumers';
 
 const welcomeMessage = 'How can I help?';
 
