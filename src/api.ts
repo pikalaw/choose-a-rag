@@ -12,7 +12,10 @@ export type Stack =
   | 'hyde-gpt4'
   | 'hyde-palm'
   | 'multi-query-gpt4'
-  | 'multi-query-palm';
+  | 'multi-query-palm'
+  | 'reranker-gpt4'
+  | 'reranker-palm';
+
 export const stackNames: {
   [key in Stack]: string;
 } = {
@@ -22,6 +25,8 @@ export const stackNames: {
   'hyde-palm': 'HyDE with PaLM',
   'multi-query-gpt4': 'Multi-query with ChatGPT-4',
   'multi-query-palm': 'Multi-query with PaLM',
+  'reranker-gpt4': 'Reranking with ChatGPT-4',
+  'reranker-palm': 'Reranking with PaLM',
 };
 export const stacks = Object.keys(stackNames).map(n => n as Stack);
 
