@@ -15,14 +15,15 @@ Stack: TypeAlias = List[Section]
 
 
 def chunk_markdown(
-    filename: str, content: SpooledTemporaryFile[bytes]
+    filename: str, content: Iterable[bytes]
 ) -> Iterable[TextNode]:
   doc_id = str(uuid.uuid4())
   stack: Stack = []
   for raw_line in content:
     line = raw_line.decode('utf-8').strip()
     if line.startswith("#"):
-      yield stack_to_text_node(stack, filename=filename, doc_id=doc_id)
+      if len(stack) > 0:
+        yield stack_to_text_node(stack, filename=filename, doc_id=doc_id)
       add_to_stack(stack, line)
     else:
       add_to_last_section(stack, line)
@@ -31,9 +32,8 @@ def chunk_markdown(
 
 
 def stack_to_text_node(stack: Stack, *, filename: str, doc_id: str) -> TextNode:
-  # TODO
   return TextNode(
-      text="",
+      text="\n".join(["\n".join(section) for section in stack]),
       relationships={
           NodeRelationship.SOURCE: RelatedNodeInfo(
               node_id=doc_id,
@@ -44,10 +44,40 @@ def stack_to_text_node(stack: Stack, *, filename: str, doc_id: str) -> TextNode:
 
 
 def add_to_stack(stack: Stack, line: str) -> None:
-  # TODO
-  ...
+  if len(stack) == 0:
+    stack.append([line])
+    return
+
+  while True:
+    section = stack[-1]
+    header = section[0]
+
+    assert header.startswith("#")
+    header_depth = compute_header_depth(header)
+    assert line.startswith("#")
+    line_depth = compute_header_depth(line)
+
+    if line_depth > header_depth:
+      stack.append([line])
+      return
+
+    del stack[-1]
+
+
+def compute_header_depth(header: str) -> int:
+  count = 0
+  for char in header:
+    if char == '#':
+        count += 1
+    else:
+        break
+  return count
+
 
 
 def add_to_last_section(stack: Stack, line: str) -> None:
-  # TODO
-  ...
+  # Ignore bare lines with no header.
+  if len(stack) == 0:
+    return
+
+  stack[-1].append(line)

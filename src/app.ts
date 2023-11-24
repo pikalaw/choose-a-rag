@@ -182,9 +182,9 @@ deleteFilesButton.addEventListener('click', async () => {
   }
   chatBox.turnQueryBox('disabled', 'Clearing files...');
 
-  await Promise.all(
-    chatBox.stacks.map(chatBoxStack => clearFiles(chatBoxStack))
-  );
+  for (const chatBoxStack of chatBox.stacks) {
+    await clearFiles(chatBoxStack);
+  }
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
 });

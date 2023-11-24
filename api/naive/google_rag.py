@@ -1,4 +1,5 @@
 import asyncio
+import chunk
 import llama_index.vector_stores.google.generativeai.genai_extension as genaix
 from llama_index.indices.managed.google.generativeai import GoogleIndex
 from llama_index.vector_stores.google.generativeai.base import NoSuchCorpusException
