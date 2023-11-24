@@ -1,4 +1,8 @@
 from abc import ABC, abstractmethod
+import google.ai.generativelanguage as genai
+from llama_index.response_synthesizers.google.generativeai import (
+    GoogleTextSynthesizer,
+)
 from openai._types import FileContent
 from pydantic import BaseModel
 from typing import Iterable
@@ -37,3 +41,24 @@ class BaseRag(BaseModel, ABC):
   @abstractmethod
   async def clear_conversation(self) -> None:
     ...
+
+
+def build_response_synthesizer() -> GoogleTextSynthesizer:
+    return GoogleTextSynthesizer.create(
+        temperature=0.8,
+        answer_style=genai.GenerateAnswerRequest.AnswerStyle.ABSTRACTIVE,
+        safety_setting=[
+            genai.SafetySetting(
+                category=category,
+                threshold=genai.SafetySetting.HarmBlockThreshold.BLOCK_NONE,
+            )
+            for category in [
+                genai.HarmCategory.HARM_CATEGORY_DEROGATORY,
+                genai.HarmCategory.HARM_CATEGORY_TOXICITY,
+                genai.HarmCategory.HARM_CATEGORY_VIOLENCE,
+                genai.HarmCategory.HARM_CATEGORY_SEXUAL,
+                genai.HarmCategory.HARM_CATEGORY_MEDICAL,
+                genai.HarmCategory.HARM_CATEGORY_DANGEROUS,
+            ]
+        ]
+    )

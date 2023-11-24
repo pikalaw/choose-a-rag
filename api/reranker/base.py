@@ -26,7 +26,7 @@ from tempfile import SpooledTemporaryFile
 from typing import Iterable, List, Literal
 from unstructured.partition.auto import partition  # type: ignore
 import uuid
-from ..base_rag import AttributedAnswer, BaseRag
+from ..base_rag import AttributedAnswer, BaseRag, build_response_synthesizer
 
 
 _logger = logging.getLogger(__name__)
@@ -71,7 +71,7 @@ class RerankerBaseRag(BaseRag):
         top_n=rerank_top_k,
         service_context=ServiceContext.from_defaults(llm=llm),
     )
-    response_synthesizer = GoogleTextSynthesizer.create()
+    response_synthesizer = build_response_synthesizer()
 
     self._store = store
     self._retriever = retriever
