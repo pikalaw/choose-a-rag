@@ -19,8 +19,8 @@ export type Stack =
 export const stackNames: {
   [key in Stack]: string;
 } = {
-  openai: 'OpenAI',
-  google: 'Google',
+  openai: 'ChatGPT-4 Assistant',
+  google: 'Google AQA',
   'hyde-gpt4': 'HyDE with ChatGPT-4',
   'hyde-palm': 'HyDE with PaLM',
   'multi-query-gpt4': 'Multi-query with ChatGPT-4',

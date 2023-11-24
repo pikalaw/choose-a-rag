@@ -12,7 +12,7 @@ from tempfile import SpooledTemporaryFile
 from typing import Iterable, List, Literal
 from unstructured.partition.auto import partition  # type: ignore
 import uuid
-from .base_rag import AttributedAnswer, BaseRag
+from ..base_rag import AttributedAnswer, BaseRag
 
 
 _logger = logging.getLogger(__name__)

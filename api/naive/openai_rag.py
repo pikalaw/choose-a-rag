@@ -6,8 +6,8 @@ from openai.types.beta.threads import MessageContentText
 from openai._types import FileContent, NOT_GIVEN, NotGiven
 from pydantic import PrivateAttr
 from typing import Iterable, List
-from .base_rag import AttributedAnswer, BaseRag
-from .debugging import pretty
+from ..base_rag import AttributedAnswer, BaseRag
+from ..debugging import pretty
 
 
 _logger = logging.getLogger(__name__)
@@ -101,7 +101,7 @@ class OpenaiRag(BaseRag):
         thread_id=self._thread.id,
         assistant_id=self._assistant.id)
     while True:
-      _logger.info(pretty(run))
+      # _logger.info(pretty(run))
       match run.status:
         case "queued" | "in_progress":
           await asyncio.sleep(1) 

@@ -6,10 +6,9 @@ import logging
 from pydantic import BaseModel
 from typing import Any, cast, List, Literal, Type
 from .base_rag import AttributedAnswer, BaseRag
-from .google_rag import GoogleRag
+from .naive import GoogleRag, OpenaiRag
 from .hyde import HydeGpt4Rag, HydePalmRag
 from .multi_query import MultiQueryGpt4Rag, MultiQueryPalmRag
-from .openai_rag import OpenaiRag
 from .reranker import RerankerGpt4Rag, RerankerPalmRag
 
 
