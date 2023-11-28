@@ -111,7 +111,6 @@ chatBox.addEventListener(stackChangeEventName, async event => {
   updateStackInUrl();
 
   const stack = (event as CustomEvent<StackChangeEvent>).detail.target;
-  stack.clearMessage();
   await start(stack);
 
   chatBox.turnQueryBox('enabled', welcomeMessage);
@@ -242,9 +241,14 @@ function setChatBoxStacksFromUrl() {
 
 async function start(chatBoxStack: ChatBoxStack) {
   const stack = chatBoxStack.stack;
-  if (stack === undefined) return;
+  if (stack === undefined) {
+    chatBoxStack.clearMessage();
+    chatBoxStack.updateFileList([]);
+    return;
+  }
 
   chatBoxStack.turnFlashingDots('visible');
+  chatBoxStack.clearMessage();
   try {
     await api.get({stack});
     chatBoxStack.updateFileList(await api.listFiles({stack}));
