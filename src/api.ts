@@ -24,16 +24,15 @@ export const stackNames: {
 } = {
   openai: 'ChatGPT-4 Assistant',
   google: 'Google AQA',
-  'hyde-gpt4': 'HyDE with ChatGPT-4',
-  'hyde-palm': 'HyDE with PaLM',
-  'multi-query-gpt4': 'Multi-query with ChatGPT-4',
-  'multi-query-palm': 'Multi-query with PaLM',
-  'reranker-gpt4': 'Reranking with ChatGPT-4',
-  'reranker-palm': 'Reranking with PaLM',
-  'window-google': 'Windowed markdown with Google',
-  'everything-gpt4':
-    'Multi-query + Reranking + Windowed markdown with ChatGPT-4',
-  'everything-palm': 'Multi-query + Reranking + Windowed markdown with PaLM',
+  'hyde-gpt4': 'HyDE + ChatGPT-4',
+  'hyde-palm': 'HyDE + PaLM',
+  'multi-query-gpt4': 'Multi-query + ChatGPT-4',
+  'multi-query-palm': 'Multi-query + PaLM',
+  'reranker-gpt4': 'Reranking + ChatGPT-4',
+  'reranker-palm': 'Reranking + PaLM',
+  'window-google': 'Windowed markdown + Google AQA',
+  'everything-gpt4': 'Multi-query + Reranking + Windowed markdown + ChatGPT-4',
+  'everything-palm': 'Multi-query + Reranking + Windowed markdown + PaLM',
 };
 export const stacks = Object.keys(stackNames).map(n => n as Stack);
 
