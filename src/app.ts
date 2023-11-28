@@ -70,7 +70,7 @@ async function ask({
       ) {
         chatBoxStack.addTheirMessages({
           sender: 'Citations',
-          messages: answer.citations,
+          messages: dedup(answer.citations),
         });
       }
       if (answer.score !== undefined && answer.score !== null) {
@@ -90,6 +90,19 @@ async function ask({
     }
   }
   chatBoxStack.turnFlashingDots('hidden');
+}
+
+function dedup(sections: string[]): string[] {
+  const seen: Set<string> = new Set();
+  const unique: string[] = [];
+  for (const section of sections) {
+    if (seen.has(section)) {
+      continue;
+    }
+    unique.push(section);
+    seen.add(section);
+  }
+  return unique;
 }
 
 chatBox.addEventListener(stackChangeEventName, async event => {
