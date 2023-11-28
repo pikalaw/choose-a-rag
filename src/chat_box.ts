@@ -146,6 +146,18 @@ export class ChatBoxStack extends HTMLElement {
     ul.appendChild(li);
   }
 
+  addTheirMessages({sender, messages}: {sender: string; messages: string[]}) {
+    const li = document.createElement(
+      'chat-box-their-message'
+    ) as ChatBoxTheirMessage;
+
+    li.sender = sender;
+    li.messages = messages;
+
+    const ul = getElement('.messages', {from: this});
+    ul.appendChild(li);
+  }
+
   clearMessage() {
     const ul = getElement('.messages', {from: this});
     ul.innerHTML = '';
@@ -196,6 +208,14 @@ export class ChatBoxMessage extends HTMLElement {
   set message(text: string) {
     const div = getElement('.message', {from: this});
     div!.replaceChildren(htmlToElement(markdown(text)));
+  }
+
+  set messages(sections: string[]) {
+    const div = getElement('.message', {from: this});
+
+    const markdownSections = sections.map(section => markdown(section));
+    const html = markdownSections.join('<hr>');
+    div!.replaceChildren(htmlToElement(html));
   }
 }
 

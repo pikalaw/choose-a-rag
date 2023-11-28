@@ -68,9 +68,9 @@ async function ask({
         answer.citations !== null &&
         answer.citations.length > 0
       ) {
-        chatBoxStack.addTheirMessage({
+        chatBoxStack.addTheirMessages({
           sender: 'Citations',
-          message: answer.citations.map(c => `* ${c}`).join('\n'),
+          messages: answer.citations,
         });
       }
       if (answer.score !== undefined && answer.score !== null) {
