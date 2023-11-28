@@ -132,7 +132,9 @@ fileUpload.addEventListener('change', async () => {
   const files = fileUpload.files;
   if (files !== null) {
     for (const chatBoxStack of chatBox.stacks) {
-      await uploadFile(chatBoxStack, files);
+      if (chatBoxStack.enabledForLoading) {
+        await uploadFile(chatBoxStack, files);
+      }
     }
   }
 
@@ -195,7 +197,9 @@ deleteFilesButton.addEventListener('click', async () => {
   chatBox.turnQueryBox('disabled', 'Clearing files...');
 
   for (const chatBoxStack of chatBox.stacks) {
-    await clearFiles(chatBoxStack);
+    if (chatBoxStack.enabledForLoading) {
+      await clearFiles(chatBoxStack);
+    }
   }
 
   chatBox.turnQueryBox('enabled', welcomeMessage);

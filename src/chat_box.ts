@@ -117,6 +117,13 @@ export class ChatBoxStack extends HTMLElement {
     stack.value = s as string;
   }
 
+  get enabledForLoading(): boolean {
+    const stack = getElement<HTMLInputElement>('.enabled-loading', {
+      from: this,
+    });
+    return stack.checked;
+  }
+
   turnFlashingDots(mode: 'visible' | 'hidden') {
     const dots = getElement('.flashing-dots', {from: this});
     dots.style.visibility = mode;
