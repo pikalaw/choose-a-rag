@@ -8,6 +8,25 @@ from pydantic import BaseModel
 from typing import Iterable
 
 
+TEMPERATURE = 0.8
+ANSWER_STYLE = genai.GenerateAnswerRequest.AnswerStyle.ABSTRACTIVE
+SAFETY_SETTING = [
+    genai.SafetySetting(
+        category=category,
+        threshold=genai.SafetySetting.HarmBlockThreshold.BLOCK_NONE,
+    )
+    for category in [
+        genai.HarmCategory.HARM_CATEGORY_DEROGATORY,
+        genai.HarmCategory.HARM_CATEGORY_TOXICITY,
+        genai.HarmCategory.HARM_CATEGORY_VIOLENCE,
+        genai.HarmCategory.HARM_CATEGORY_SEXUAL,
+        genai.HarmCategory.HARM_CATEGORY_MEDICAL,
+        genai.HarmCategory.HARM_CATEGORY_DANGEROUS,
+        genai.HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+    ]
+]
+
+
 class AttributedAnswer(BaseModel):
   answer: str
   citations: Iterable[str] | None = None
@@ -45,20 +64,7 @@ class BaseRag(BaseModel, ABC):
 
 def build_response_synthesizer() -> GoogleTextSynthesizer:
     return GoogleTextSynthesizer.create(
-        temperature=0.8,
-        answer_style=genai.GenerateAnswerRequest.AnswerStyle.ABSTRACTIVE,
-        safety_setting=[
-            genai.SafetySetting(
-                category=category,
-                threshold=genai.SafetySetting.HarmBlockThreshold.BLOCK_NONE,
-            )
-            for category in [
-                genai.HarmCategory.HARM_CATEGORY_DEROGATORY,
-                genai.HarmCategory.HARM_CATEGORY_TOXICITY,
-                genai.HarmCategory.HARM_CATEGORY_VIOLENCE,
-                genai.HarmCategory.HARM_CATEGORY_SEXUAL,
-                genai.HarmCategory.HARM_CATEGORY_MEDICAL,
-                genai.HarmCategory.HARM_CATEGORY_DANGEROUS,
-            ]
-        ]
+        temperature=TEMPERATURE,
+        answer_style=ANSWER_STYLE,
+        safety_setting=SAFETY_SETTING,
     )

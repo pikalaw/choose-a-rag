@@ -12,7 +12,13 @@ from tempfile import SpooledTemporaryFile
 from typing import Iterable, List, Literal
 from unstructured.partition.auto import partition  # type: ignore
 import uuid
-from ..base_rag import AttributedAnswer, BaseRag
+from ..base_rag import (
+    ANSWER_STYLE,
+    AttributedAnswer,
+    BaseRag,
+    SAFETY_SETTING,
+    TEMPERATURE,
+)
 
 
 _logger = logging.getLogger(__name__)
@@ -37,7 +43,11 @@ class GoogleRag(BaseRag):
   def __init__(self, client: GoogleIndex) -> None:
     super().__init__()
     self._client = client
-    self._query_engine = client.as_query_engine()
+    self._query_engine = client.as_query_engine(
+        temperature=TEMPERATURE,
+        answer_style=ANSWER_STYLE,
+        safety_setting=SAFETY_SETTING,
+    )
 
   @classmethod
   async def get_default(cls) -> "BaseRag":
