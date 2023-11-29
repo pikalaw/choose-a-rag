@@ -23,7 +23,7 @@ import logging
 from openai._types import FileContent
 from pydantic import BaseModel, PrivateAttr
 from tempfile import SpooledTemporaryFile
-from typing import cast, Dict, Iterable, List, Literal
+from typing import Any, cast, Dict, Iterable, List, Literal
 from ..base_rag import AttributedAnswer, BaseRag, build_response_synthesizer
 from ..chunkers import chunk_unstructured
 
@@ -234,7 +234,7 @@ def _get_answerable_probability(response: Response) -> float | None:
   return float(value)
 
 
-def _stop_fn(stop_dict: Dict) -> bool:
+def _stop_fn(stop_dict: Dict[str, Any]) -> bool:
   """Stop function for multi-step query combiner."""
   query_bundle = cast(QueryBundle, stop_dict.get("query_bundle"))
   if query_bundle is None:
