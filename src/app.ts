@@ -6,6 +6,7 @@ import {
   queryEventName,
   StackChangeEvent,
   stackChangeEventName,
+  StackOrNone,
 } from './chat_box.js';
 import {getElement} from './common/view_model.js';
 import * as api from './api.js';
@@ -48,7 +49,7 @@ async function ask({
   query: string;
 }): Promise<void> {
   const stack = chatBoxStack.stack;
-  if (stack === undefined) return;
+  if (stack === 'none') return;
 
   chatBoxStack.turnFlashingDots('visible');
   chatBoxStack.clearMessage();
@@ -146,7 +147,7 @@ async function uploadFile(
   files: FileList
 ): Promise<void> {
   const stack = chatBoxStack.stack;
-  if (stack === undefined) return;
+  if (stack === 'none') return;
 
   chatBoxStack.turnFlashingDots('visible');
 
@@ -207,7 +208,7 @@ deleteFilesButton.addEventListener('click', async () => {
 
 async function clearFiles(chatBoxStack: ChatBoxStack) {
   const stack = chatBoxStack.stack;
-  if (stack === undefined) return;
+  if (stack === 'none') return;
 
   chatBoxStack.turnFlashingDots('visible');
   try {
@@ -239,20 +240,20 @@ function setChatBoxStacksFromUrl() {
   const stackIds = url.searchParams.getAll('stack');
   for (let i = 0; i < chatBox.stacks.length; i++) {
     if (i >= stackIds.length) break;
-    chatBox.stacks[i].stack = stackIds[i] as api.Stack;
+    chatBox.stacks[i].stack = stackIds[i] as StackOrNone;
   }
 }
 
 async function start(chatBoxStack: ChatBoxStack) {
+  chatBoxStack.clearMessage();
+  chatBoxStack.updateFileList([]);
+
   const stack = chatBoxStack.stack;
-  if (stack === undefined) {
-    chatBoxStack.clearMessage();
-    chatBoxStack.updateFileList([]);
+  if (stack === 'none') {
     return;
   }
 
   chatBoxStack.turnFlashingDots('visible');
-  chatBoxStack.clearMessage();
   try {
     await api.get({stack});
     chatBoxStack.updateFileList(await api.listFiles({stack}));

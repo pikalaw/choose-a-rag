@@ -2,12 +2,12 @@ from llama_index.schema import NodeRelationship, RelatedNodeInfo, TextNode
 import logging
 from typing import Iterable, List, TypeAlias
 import uuid
+from .base import MAX_CHUNK_SIZE
 
 
 _logger = logging.getLogger(__name__)
 _logger.setLevel(logging.INFO)
 _logger.addHandler(logging.StreamHandler())
-MAX_CHUNK_SIZE = 2000
 
 
 Section: TypeAlias = List[str]

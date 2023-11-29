@@ -4,7 +4,7 @@ from openai._types import FileContent
 from tempfile import SpooledTemporaryFile
 from ..naive import GoogleRag
 from ..base_rag import BaseRag
-from .markdown_chunker import chunk_markdown
+from ..chunkers import chunk_markdown
 
 
 _logger = logging.getLogger(__name__)

@@ -4,14 +4,11 @@ from llama_index.indices.managed.google.generativeai import GoogleIndex
 from llama_index.vector_stores.google.generativeai.base import NoSuchCorpusException
 from llama_index.indices.query.base import BaseQueryEngine
 from llama_index.response.schema import Response
-from llama_index.schema import NodeRelationship, RelatedNodeInfo, TextNode
 import logging
 from openai._types import FileContent
 from pydantic import BaseModel, PrivateAttr
 from tempfile import SpooledTemporaryFile
 from typing import Iterable, List, Literal
-from unstructured.partition.auto import partition  # type: ignore
-import uuid
 from ..base_rag import (
     ANSWER_STYLE,
     AttributedAnswer,
@@ -19,6 +16,7 @@ from ..base_rag import (
     SAFETY_SETTING,
     TEMPERATURE,
 )
+from ..chunkers import chunk_unstructured
 
 
 _logger = logging.getLogger(__name__)
@@ -98,25 +96,8 @@ class GoogleRag(BaseRag):
       self, *, filename: str, content: FileContent, content_type: str
   ) -> None:
     assert isinstance(content, SpooledTemporaryFile)
-    elements = partition(
-        file=content,
-        content_type=content_type)
-    text_chunks = [" ".join(str(el).split()) for el in elements]
-
-    doc_id = str(uuid.uuid4())
     self._client.insert_nodes(
-        [
-            TextNode(
-                text=chunk,
-                relationships={
-                    NodeRelationship.SOURCE: RelatedNodeInfo(
-                        node_id=doc_id,
-                        metadata={"file_name": filename},
-                    )
-                },)
-            for chunk in text_chunks
-        ]
-    )
+        list(chunk_unstructured(filename, content, content_type)))
 
   async def clear_files(self) -> None:
     return await asyncio.to_thread(lambda: self._clear_files())

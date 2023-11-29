@@ -14,10 +14,12 @@ export interface QueryEvent {
   text: string;
 }
 
+export type StackOrNone = api.Stack | 'none';
+
 /// stack change event.
 export const stackChangeEventName = 'stack-change';
 export interface StackChangeEvent {
-  new_stack: api.Stack | undefined;
+  new_stack: StackOrNone;
   target: ChatBoxStack;
 }
 
@@ -90,7 +92,7 @@ export class ChatBoxStack extends HTMLElement {
 
     const stack = this.getAttribute('stack');
     if (stack !== null) {
-      this.stack = stack as api.Stack;
+      this.stack = stack as StackOrNone;
     }
 
     const select = getElement<HTMLInputElement>('.stack-options', {from: this});
@@ -105,15 +107,14 @@ export class ChatBoxStack extends HTMLElement {
     });
   }
 
-  get stack(): api.Stack | undefined {
+  get stack(): StackOrNone {
     const stack = getElement<HTMLInputElement>('.stack-options', {from: this});
-    if (stack.value === '') return undefined;
+    if (stack.value === 'none') return 'none';
     return stack.value as api.Stack;
   }
 
-  set stack(s: api.Stack | undefined) {
+  set stack(s: StackOrNone) {
     const stack = getElement<HTMLInputElement>('.stack-options', {from: this});
-    if (s === undefined) stack.value = '';
     stack.value = s as string;
   }
 
