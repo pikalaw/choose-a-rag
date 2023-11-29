@@ -34,6 +34,9 @@ class PaLM(CustomLLM):
         from .genaix import list_models
 
         models = list_models()
+        for model in models:
+            print(model.name)
+
         models_dict = {m.name: m for m in models}
         if model_name not in models_dict:
             raise ValueError(

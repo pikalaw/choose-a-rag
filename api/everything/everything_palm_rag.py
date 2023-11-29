@@ -3,8 +3,7 @@ from llama_index.vector_stores.google.generativeai.base import (
 )
 import logging
 from .base import DEFAULT_CORPUS_ID, EverythingBaseRag
-from ..base_rag import BaseRag
-from ..llms import PaLM
+from ..base_rag import BaseRag, build_palm
 
 
 _logger = logging.getLogger(__name__)
@@ -16,7 +15,7 @@ class EverythingPalmRag(EverythingBaseRag):
     @classmethod
     async def get_default(cls) -> BaseRag:
         default_corpus_id = DEFAULT_CORPUS_ID
-        palm = PaLM()
+        palm = build_palm()
         try:
             return await cls.get(corpus_id=default_corpus_id, llm=palm)
         except NoSuchCorpusException:
