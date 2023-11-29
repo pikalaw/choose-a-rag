@@ -51,7 +51,14 @@ export class ChatBox extends HTMLElement {
     }
   }
 
-  turnQueryBox(mode: 'enabled' | 'disabled', placeholder = 'Chat with me') {
+  turnControls(mode: 'enabled' | 'disabled', placeholder: string) {
+    this.turnQueryBox(mode, placeholder);
+    for (const stack of this.stacks) {
+      stack.turnControls(mode);
+    }
+  }
+
+  turnQueryBox(mode: 'enabled' | 'disabled', placeholder: string) {
     const input: HTMLTextAreaElement = getElement('.query', {from: this});
     const enabled = mode === 'enabled';
     input.disabled = !enabled;
@@ -128,6 +135,18 @@ export class ChatBoxStack extends HTMLElement {
   turnFlashingDots(mode: 'visible' | 'hidden') {
     const dots = getElement('.flashing-dots', {from: this});
     dots.style.visibility = mode;
+  }
+
+  turnControls(mode: 'enabled' | 'disabled') {
+    const enabled = mode === 'enabled';
+
+    const loading = getElement<HTMLInputElement>('.enabled-loading', {
+      from: this,
+    });
+    loading.disabled = !enabled;
+
+    const select = getElement<HTMLInputElement>('.stack-options', {from: this});
+    select.disabled = !enabled;
   }
 
   addMyMessage({sender, message}: {sender: string; message: string}) {

@@ -19,7 +19,7 @@ chatBox.turnQueryBox('enabled', welcomeMessage);
 chatBox.turnFlashingDots('hidden');
 
 chatBox.addEventListener(queryEventName, async event => {
-  chatBox.turnQueryBox('disabled', 'Running...');
+  turnControls('disabled', 'Running...');
 
   const query = (event as CustomEvent<QueryEvent>).detail.text;
   if (query.startsWith('<')) {
@@ -38,7 +38,7 @@ chatBox.addEventListener(queryEventName, async event => {
     );
   }
 
-  chatBox.turnQueryBox('enabled', welcomeMessage);
+  turnControls('enabled', welcomeMessage);
 });
 
 async function ask({
@@ -107,14 +107,14 @@ function dedup(sections: string[]): string[] {
 }
 
 chatBox.addEventListener(stackChangeEventName, async event => {
-  chatBox.turnQueryBox('disabled', 'Starting...');
+  turnControls('disabled', 'Starting...');
 
   updateStackInUrl();
 
   const stack = (event as CustomEvent<StackChangeEvent>).detail.target;
   await start(stack);
 
-  chatBox.turnQueryBox('enabled', welcomeMessage);
+  turnControls('enabled', welcomeMessage);
 });
 
 function updateStackInUrl() {
@@ -128,7 +128,7 @@ function updateStackInUrl() {
 
 const fileUpload = getElement<HTMLInputElement>('#files', {from: document});
 fileUpload.addEventListener('change', async () => {
-  chatBox.turnQueryBox('disabled', 'Ingesting files...');
+  turnControls('disabled', 'Ingesting files...');
 
   const files = fileUpload.files;
   if (files !== null) {
@@ -139,7 +139,7 @@ fileUpload.addEventListener('change', async () => {
     }
   }
 
-  chatBox.turnQueryBox('enabled', welcomeMessage);
+  turnControls('enabled', welcomeMessage);
 });
 
 async function uploadFile(
@@ -195,7 +195,7 @@ deleteFilesButton.addEventListener('click', async () => {
   if (!confirm('Are you sure you want to delete all files?')) {
     return;
   }
-  chatBox.turnQueryBox('disabled', 'Clearing files...');
+  turnControls('disabled', 'Clearing files...');
 
   for (const chatBoxStack of chatBox.stacks) {
     if (chatBoxStack.enabledForLoading) {
@@ -203,7 +203,7 @@ deleteFilesButton.addEventListener('click', async () => {
     }
   }
 
-  chatBox.turnQueryBox('enabled', welcomeMessage);
+  turnControls('enabled', welcomeMessage);
 });
 
 async function clearFiles(chatBoxStack: ChatBoxStack) {
@@ -226,13 +226,21 @@ async function clearFiles(chatBoxStack: ChatBoxStack) {
   chatBoxStack.turnFlashingDots('hidden');
 }
 
+function turnControls(mode: 'enabled' | 'disabled', placeholder: string) {
+  const enabled = mode === 'enabled';
+
+  chatBox.turnControls(mode, placeholder);
+  fileUpload.disabled = !enabled;
+  deleteFilesButton.disabled = !enabled;
+}
+
 async function startAll() {
-  chatBox.turnQueryBox('disabled', 'Starting...');
+  turnControls('disabled', 'Starting...');
 
   setChatBoxStacksFromUrl();
   await Promise.all(chatBox.stacks.map(chatBoxStack => start(chatBoxStack)));
 
-  chatBox.turnQueryBox('enabled', welcomeMessage);
+  turnControls('enabled', welcomeMessage);
 }
 
 function setChatBoxStacksFromUrl() {
