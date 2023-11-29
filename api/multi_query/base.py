@@ -18,11 +18,12 @@ from llama_index.query_engine.multistep_query_engine import (
     MultiStepQueryEngine,
 )
 from llama_index.response.schema import Response
+from llama_index.schema import QueryBundle
 import logging
 from openai._types import FileContent
 from pydantic import BaseModel, PrivateAttr
 from tempfile import SpooledTemporaryFile
-from typing import Iterable, List, Literal
+from typing import cast, Dict, Iterable, List, Literal
 from ..base_rag import AttributedAnswer, BaseRag, build_response_synthesizer
 from ..chunkers import chunk_unstructured
 
@@ -119,6 +120,7 @@ class MultiQueryBaseRag(BaseRag):
         query_transform=step_decompose_transform,
         response_synthesizer=response_synthesizer,
         index_summary="Ask me anything.",
+        stop_fn=_stop_fn,
         num_steps=6)
 
     self._store = store
@@ -230,3 +232,15 @@ def _get_answerable_probability(response: Response) -> float | None:
   if value is None:
     return None
   return float(value)
+
+
+def _stop_fn(stop_dict: Dict) -> bool:
+  """Stop function for multi-step query combiner."""
+  query_bundle = cast(QueryBundle, stop_dict.get("query_bundle"))
+  if query_bundle is None:
+    raise ValueError("Response must be provided to stop function.")
+
+  return (
+      "none" in query_bundle.query_str.lower() or 
+      query_bundle.query_str.strip() == ""
+  )
