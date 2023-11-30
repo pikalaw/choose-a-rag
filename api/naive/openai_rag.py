@@ -124,7 +124,7 @@ class OpenaiRag(BaseRag):
     ):
       if message.role != 'assistant':
         continue
-      _logger.info(pretty(message))
+      # _logger.info(pretty(message))
       for content in message.content:
         if not isinstance(content, MessageContentText):
           _logger.warn(f"Content unexpected: {content}")
