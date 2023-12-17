@@ -71,59 +71,9 @@ def build_response_synthesizer() -> GoogleTextSynthesizer:
     )
 
 
-def build_palm() -> PaLM:
-    """Choices:
-    models/ai-village-001
-    models/bard-factual
-    models/chat-bard-001
-    models/chat-bard-002
-    models/chat-bard-003
-    models/chat-bard-004
-    models/chat-bard-005
-    models/chat-bard-006
-    models/chat-bard-007
-    models/chat-bard-008
-    models/chat-bard-009
-    models/chat-bard-010
-    models/chat-bard-013
-    models/chat-bard-014
-    models/chat-bard-015
-    models/chat-bard-016
-    models/chat-bard-017
-    models/chat-bard-018
-    models/chat-bard-019
-    models/chat-bard-020
-    models/chat-bison-001
-    models/chat-ulm-factual-001
-    models/chat-ulm-latest
-    models/g-001
-    models/g-002
-    models/g-003
-    models/g-004
-    models/g-005
-    models/g-006
-    models/lamda-api-000
-    models/lamda-api-001
-    models/lamda-api-eval
-    models/meena2-dialog
-    models/text-bison-001
-    models/text-bison-canary-001
-    models/text-eval-m-001
-    models/text-eval-m-231019
-    models/text-eval-s-001
-    models/text-gemini-m-llmit
-    models/text-llmit-24b-sax-074
-    models/text-unicorn-001
-    models/embedding-001
-    models/embedding-gecko-001
-    models/embedding-gecko-002
-    models/gemini-pro
-    models/gemini-pro-vision
-    models/gemini-ultra
-    models/multimodal-eval-231122
-    models/text-eval-231121
-    models/xl-eval-231122
-    models/embedding-001
-    """
-    return PaLM(model_name="models/text-bison-001")
+def build_gemini_pro() -> PaLM:
+    return PaLM(model_name="models/gemini-pro")
+    
+def build_gemini_ultra() -> PaLM:
+    return PaLM(model_name="models/gemini-ultra")
     

@@ -3,7 +3,7 @@ from llama_index.vector_stores.google.generativeai.base import (
 )
 import logging
 from .base import DEFAULT_CORPUS_ID, RerankerBaseRag
-from ..base_rag import BaseRag, build_palm
+from ..base_rag import BaseRag, build_gemini_ultra
 
 
 _logger = logging.getLogger(__name__)
@@ -11,11 +11,11 @@ _logger.setLevel(logging.INFO)
 _logger.addHandler(logging.StreamHandler())
 
 
-class RerankerPalmRag(RerankerBaseRag):
+class RerankerGeminiUltraRag(RerankerBaseRag):
     @classmethod
     async def get_default(cls) -> BaseRag:
         default_corpus_id = DEFAULT_CORPUS_ID
-        palm = build_palm()
+        palm = build_gemini_ultra()
         try:
             return await cls.get(corpus_id=default_corpus_id, llm=palm)
         except NoSuchCorpusException:

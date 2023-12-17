@@ -80,9 +80,9 @@ class PaLM(CustomLLM):
             Tuple[str, str]: Tuple of the predicted answer and the formatted prompt.
 
         """
-        from .genaix import generate_text
+        from .genaix import generate_content
 
-        completion = generate_text(
+        completion = generate_content(
             model=self.model_name,
             prompt=prompt,
             **kwargs,

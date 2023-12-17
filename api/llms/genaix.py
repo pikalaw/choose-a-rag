@@ -34,3 +34,55 @@ def generate_text(model: str, prompt: str) -> str:
     return ''
   candidate = candidates[0]
   return str(candidate.output)
+
+
+def generate_content(model: str, prompt: str) -> str:
+  service = genai.GenerativeServiceClient(
+      client_options=client_options_lib.ClientOptions(
+          api_endpoint=_DEFAULT_API_ENDPOINT
+      ),
+  )
+  response = service.generate_content(
+      request=genai.GenerateContentRequest(
+          model=model,
+          contents=[
+              genai.Content(
+                  parts=[
+                      genai.Part(text=prompt),
+                  ],
+              )
+          ],
+      )
+  )
+
+  if len(response.candidates) == 0:
+    return ''
+
+  candidate = response.candidates[0]
+
+  if len(candidate.content.parts) == 0:
+    return ''
+
+  part = candidate.content.parts[0]
+  return part.text
+
+
+def generate_answer(model: str, prompt: str) -> str:
+  service = genai.GenerativeServiceClient(
+      client_options=client_options_lib.ClientOptions(
+          api_endpoint=_DEFAULT_API_ENDPOINT
+      ),
+  )
+  response = service.generate_answer(
+      request=genai.GenerateAnswerRequest(
+          model=model,
+          contents=[
+              genai.Content(
+                  parts=[
+                      genai.Part(text=prompt),
+                  ],
+              )
+          ],
+      )
+  )
+  return response.answer.content.parts[0].text

@@ -7,11 +7,27 @@ from pydantic import BaseModel
 from typing import Any, cast, List, Literal, Type
 from .base_rag import AttributedAnswer, BaseRag
 from .naive import GoogleRag, OpenaiRag
-from .hyde import HydeGpt4Rag, HydePalmRag
-from .multi_query import MultiQueryGpt4Rag, MultiQueryPalmRag
-from .reranker import RerankerGpt4Rag, RerankerPalmRag
+from .hyde import (
+    HydeGpt4Rag,
+    HydeGeminiProRag,
+    HydeGeminiUltraRag,
+)
+from .multi_query import (
+    MultiQueryGpt4Rag,
+    MultiQueryGeminiProRag,
+    MultiQueryGeminiUltraRag,
+)
+from .reranker import (
+    RerankerGpt4Rag,
+    RerankerGeminiProRag,
+    RerankerGeminiUltraRag,
+)
 from .window import WindowGoogleRag
-from .everything import EverythingGpt4Rag, EverythingPalmRag
+from .everything import (
+    EverythingGpt4Rag,
+    EverythingGeminiProRag,
+    EverythingGeminiUltraRag,
+)
 
 
 app = FastAPI()
@@ -53,27 +69,35 @@ StackId = Literal[
     "openai",
     "google",
     "hyde-gpt4",
-    "hyde-palm",
+    "hyde-gemini-pro",
+    "hyde-gemini-ultra",
     "multi-query-gpt4",
-    "multi-query-palm",
+    "multi-query-gemini-pro",
+    "multi-query-gemini-ultra",
     "reranker-gpt4",
-    "reranker-palm",
+    "reranker-gemini-pro",
+    "reranker-gemini-ultra",
     "window-google",
     "everything-gpt4",
-    "everything-palm",
+    "everything-gemini-pro",
+    "everything-gemini-ultra",
 ]
 stack_types: dict[StackId, Type[BaseRag]] = {
   "openai": OpenaiRag,
   "google": GoogleRag,
   "hyde-gpt4": HydeGpt4Rag,
-  "hyde-palm": HydePalmRag,
+  "hyde-gemini-pro": HydeGeminiProRag,
+  "hyde-gemini-ultra": HydeGeminiUltraRag,
   "multi-query-gpt4": MultiQueryGpt4Rag,
-  "multi-query-palm": MultiQueryPalmRag,
+  "multi-query-gemini-pro": MultiQueryGeminiProRag,
+  "multi-query-gemini-ultra": MultiQueryGeminiUltraRag,
   "reranker-gpt4": RerankerGpt4Rag,
-  "reranker-palm": RerankerPalmRag,
+  "reranker-gemini-pro": RerankerGeminiProRag,
+  "reranker-gemini-ultra": RerankerGeminiUltraRag,
   "window-google": WindowGoogleRag,
   "everything-gpt4": EverythingGpt4Rag,
-  "everything-palm": EverythingPalmRag,
+  "everything-gemini-pro": EverythingGeminiProRag,
+  "everything-gemini-ultra": EverythingGeminiUltraRag,
 }
 stacks: dict[StackId, BaseRag | None] = {
   stack: None for stack in stack_types.keys()

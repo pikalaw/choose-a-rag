@@ -10,14 +10,18 @@ export type Stack =
   | 'openai'
   | 'google'
   | 'hyde-gpt4'
-  | 'hyde-palm'
+  | 'hyde-gemini-pro'
+  | 'hyde-gemini-ultra'
   | 'multi-query-gpt4'
-  | 'multi-query-palm'
+  | 'multi-query-gemini-pro'
+  | 'multi-query-gemini-ultra'
   | 'reranker-gpt4'
-  | 'reranker-palm'
+  | 'reranker-gemini-pro'
+  | 'reranker-gemini-ultra'
   | 'window-google'
   | 'everything-gpt4'
-  | 'everything-palm';
+  | 'everything-gemini-pro'
+  | 'everything-gemini-ultra';
 
 export const stackNames: {
   [key in Stack]: string;
@@ -25,14 +29,20 @@ export const stackNames: {
   openai: 'ChatGPT-4 Assistant',
   google: 'Google AQA',
   'hyde-gpt4': 'HyDE + ChatGPT-4',
-  'hyde-palm': 'HyDE + PaLM',
+  'hyde-gemini-pro': 'HyDE + Gemini Pro',
+  'hyde-gemini-ultra': 'HyDE + Gemini Ultra',
   'multi-query-gpt4': 'Multi-query + ChatGPT-4',
-  'multi-query-palm': 'Multi-query + PaLM',
+  'multi-query-gemini-pro': 'Multi-query + Gemini Pro',
+  'multi-query-gemini-ultra': 'Multi-query + Gemini Ultra',
   'reranker-gpt4': 'Reranking + ChatGPT-4',
-  'reranker-palm': 'Reranking + PaLM',
+  'reranker-gemini-pro': 'Reranking + Gemini Pro',
+  'reranker-gemini-ultra': 'Reranking + Gemini Ultra',
   'window-google': 'Windowed markdown + Google AQA',
   'everything-gpt4': 'Multi-query + Reranking + Windowed markdown + ChatGPT-4',
-  'everything-palm': 'Multi-query + Reranking + Windowed markdown + PaLM',
+  'everything-gemini-pro':
+    'Multi-query + Reranking + Windowed markdown + Gemini Pro',
+  'everything-gemini-ultra':
+    'Multi-query + Reranking + Windowed markdown + Gemini Ultra',
 };
 export const stacks = Object.keys(stackNames).map(n => n as Stack);
 
