@@ -74,6 +74,7 @@ def build_response_synthesizer() -> GoogleTextSynthesizer:
 def build_gemini_pro() -> PaLM:
     return PaLM(model_name="models/gemini-pro")
     
+
 def build_gemini_ultra() -> PaLM:
     return PaLM(model_name="models/gemini-ultra")
     

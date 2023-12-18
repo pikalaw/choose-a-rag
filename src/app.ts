@@ -77,7 +77,7 @@ async function ask({
       if (answer.score !== undefined && answer.score !== null) {
         chatBoxStack.addTheirMessage({
           sender: 'Answerability score',
-          message: String(answer.score),
+          message: answer.score.toFixed(4),
         });
       }
     }

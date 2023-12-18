@@ -3,6 +3,7 @@ import logging
 from llama_index import VectorStoreIndex
 from llama_index.indices.query.base import BaseQueryEngine
 from llama_index.indices.query.query_transform import HyDEQueryTransform
+from llama_index.llm_predictor import LLMPredictor
 from llama_index.llms.base import LLM
 from llama_index.query_engine.transform_query_engine import (
     TransformQueryEngine,
@@ -17,7 +18,12 @@ from openai._types import FileContent
 from pydantic import BaseModel, PrivateAttr
 from tempfile import SpooledTemporaryFile
 from typing import Iterable, List, Literal
-from ..base_rag import AttributedAnswer, BaseRag, build_response_synthesizer
+from ..base_rag import (
+    AttributedAnswer,
+    BaseRag,
+    build_gemini_pro,
+    build_response_synthesizer
+)
 from ..chunkers import chunk_unstructured
 
 
@@ -50,7 +56,8 @@ class HydeBaseRag(BaseRag):
     query_engine = index.as_query_engine(
         response_synthesizer=response_synthesizer)
 
-    hyde = HyDEQueryTransform(include_original=False)
+    hyde = HyDEQueryTransform(
+        llm_predictor=LLMPredictor(build_gemini_pro()))
     hyde_query_engine = TransformQueryEngine(query_engine, hyde)
 
     self._store = store
