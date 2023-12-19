@@ -112,7 +112,7 @@ class EverythingBaseRag(BaseRag):
       store: GoogleVectorStore,
       llm: LLM,
       retrieve_top_k: int = 10,
-      rerank_top_k: int = 2,
+      rerank_top_k: int = 5,
   ) -> None:
     super().__init__()
 
@@ -121,7 +121,7 @@ class EverythingBaseRag(BaseRag):
         service_context=google_service_context)
     response_synthesizer = build_response_synthesizer()
     reranker = LLMRerank(
-        choice_batch_size=5,
+        choice_batch_size=10,
         top_n=rerank_top_k,
         service_context=ServiceContext.from_defaults(llm=llm),
     )

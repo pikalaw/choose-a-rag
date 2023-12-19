@@ -110,6 +110,7 @@ class MultiQueryBaseRag(BaseRag):
         service_context=google_service_context)
     response_synthesizer = build_response_synthesizer()
     single_step_query_engine = index.as_query_engine(
+        similarity_top_k=5,
         response_synthesizer=response_synthesizer)
     step_decompose_transform = StepDecomposeQueryTransform(
         LLMPredictor(llm=llm),

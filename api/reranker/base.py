@@ -50,7 +50,7 @@ class RerankerBaseRag(BaseRag):
       store: GoogleVectorStore,
       llm: LLM,
       retrieve_top_k: int = 10,
-      rerank_top_k: int = 2) -> None:
+      rerank_top_k: int = 5) -> None:
     super().__init__()
 
     index = VectorStoreIndex.from_vector_store(

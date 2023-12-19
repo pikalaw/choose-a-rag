@@ -54,6 +54,7 @@ class HydeBaseRag(BaseRag):
         service_context=google_service_context)
     response_synthesizer = build_response_synthesizer()
     query_engine = index.as_query_engine(
+        similarity_top_k=5,
         response_synthesizer=response_synthesizer)
 
     hyde = HyDEQueryTransform(

@@ -42,6 +42,7 @@ class GoogleRag(BaseRag):
     super().__init__()
     self._client = client
     self._query_engine = client.as_query_engine(
+        similarity_top_k=5,
         temperature=TEMPERATURE,
         answer_style=ANSWER_STYLE,
         safety_setting=SAFETY_SETTING,
