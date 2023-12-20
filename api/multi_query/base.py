@@ -24,7 +24,12 @@ from openai._types import FileContent
 from pydantic import BaseModel, PrivateAttr
 from tempfile import SpooledTemporaryFile
 from typing import Any, cast, Dict, Iterable, List, Literal
-from ..base_rag import AttributedAnswer, BaseRag, build_response_synthesizer
+from ..base_rag import (
+    AttributedAnswer,
+    BaseRag,
+    build_response_synthesizer,
+    PASSAGE_COUNT,
+)
 from ..chunkers import chunk_unstructured
 
 
@@ -38,6 +43,7 @@ class ConversationMessage(BaseModel):
   message: AttributedAnswer
 
 
+STEP_COUNT = 5
 DEFAULT_CORPUS_ID = "ltsang-unstructured"
 _STEP_DECOMPOSE_QUERY_TRANSFORM_TMPL = (
     "The original question is as follows: {query_str}\n"
@@ -110,7 +116,7 @@ class MultiQueryBaseRag(BaseRag):
         service_context=google_service_context)
     response_synthesizer = build_response_synthesizer()
     single_step_query_engine = index.as_query_engine(
-        similarity_top_k=5,
+        similarity_top_k=PASSAGE_COUNT,
         response_synthesizer=response_synthesizer)
     step_decompose_transform = StepDecomposeQueryTransform(
         LLMPredictor(llm=llm),
@@ -122,7 +128,7 @@ class MultiQueryBaseRag(BaseRag):
         response_synthesizer=response_synthesizer,
         index_summary="Ask me anything.",
         stop_fn=_stop_fn,
-        num_steps=6)
+        num_steps=STEP_COUNT)
 
     self._store = store
     self._query_engine = query_engine

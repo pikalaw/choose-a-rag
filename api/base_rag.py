@@ -9,7 +9,7 @@ from typing import Iterable
 from .llms import PaLM
 
 
-TEMPERATURE = 0.8
+TEMPERATURE = 0.2
 ANSWER_STYLE = genai.GenerateAnswerRequest.AnswerStyle.ABSTRACTIVE
 SAFETY_SETTING = [
     genai.SafetySetting(
@@ -26,6 +26,8 @@ SAFETY_SETTING = [
         genai.HarmCategory.HARM_CATEGORY_UNSPECIFIED,
     ]
 ]
+# Maximum number of passage to use to answer questions.
+PASSAGE_COUNT = 3
 
 
 class AttributedAnswer(BaseModel):

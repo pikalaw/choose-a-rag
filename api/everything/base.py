@@ -28,8 +28,17 @@ from openai._types import FileContent
 from pydantic import BaseModel, PrivateAttr
 from tempfile import SpooledTemporaryFile
 from typing import Any, cast, Dict, Iterable, List, Literal
-from ..base_rag import AttributedAnswer, BaseRag, build_response_synthesizer
+from ..base_rag import (
+    AttributedAnswer,
+    BaseRag,
+    build_response_synthesizer,
+    PASSAGE_COUNT,
+)
 from ..chunkers import chunk_markdown, chunk_unstructured
+from ..reranker.base import (
+    CHOICE_BATCH_SIZE,
+    OVER_RETRIEVE_FACTOR,
+)
 
 
 _logger = logging.getLogger(__name__)
@@ -110,10 +119,8 @@ class EverythingBaseRag(BaseRag):
       self,
       *,
       store: GoogleVectorStore,
-      llm: LLM,
-      retrieve_top_k: int = 10,
-      rerank_top_k: int = 5,
-  ) -> None:
+      llm: LLM
+   ) -> None:
     super().__init__()
 
     index = VectorStoreIndex.from_vector_store(
@@ -121,15 +128,15 @@ class EverythingBaseRag(BaseRag):
         service_context=google_service_context)
     response_synthesizer = build_response_synthesizer()
     reranker = LLMRerank(
-        choice_batch_size=10,
-        top_n=rerank_top_k,
+        top_n=PASSAGE_COUNT,
+        choice_batch_size=CHOICE_BATCH_SIZE,
         service_context=ServiceContext.from_defaults(llm=llm),
     )
 
     single_step_query_engine = RetrieverQueryEngine.from_args(
       retriever=VectorIndexRetriever(
           index=index,
-          similarity_top_k=retrieve_top_k,
+          similarity_top_k=PASSAGE_COUNT * OVER_RETRIEVE_FACTOR,
       ),
       response_synthesizer=response_synthesizer,
       node_postprocessors=[reranker],

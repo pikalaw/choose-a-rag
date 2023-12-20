@@ -13,6 +13,7 @@ from ..base_rag import (
     ANSWER_STYLE,
     AttributedAnswer,
     BaseRag,
+    PASSAGE_COUNT,
     SAFETY_SETTING,
     TEMPERATURE,
 )
@@ -42,7 +43,7 @@ class GoogleRag(BaseRag):
     super().__init__()
     self._client = client
     self._query_engine = client.as_query_engine(
-        similarity_top_k=5,
+        similarity_top_k=PASSAGE_COUNT,
         temperature=TEMPERATURE,
         answer_style=ANSWER_STYLE,
         safety_setting=SAFETY_SETTING,

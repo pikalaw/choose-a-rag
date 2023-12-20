@@ -19,7 +19,12 @@ from openai._types import FileContent
 from pydantic import BaseModel, PrivateAttr
 from tempfile import SpooledTemporaryFile
 from typing import Iterable, List, Literal
-from ..base_rag import AttributedAnswer, BaseRag, build_response_synthesizer
+from ..base_rag import (
+    AttributedAnswer,
+    BaseRag,
+    build_response_synthesizer,
+    PASSAGE_COUNT,
+)
 from ..chunkers import chunk_unstructured
 
 
@@ -29,6 +34,8 @@ _logger.addHandler(logging.StreamHandler())
 
 
 DEFAULT_CORPUS_ID = "ltsang-unstructured"
+OVER_RETRIEVE_FACTOR = 5
+CHOICE_BATCH_SIZE = PASSAGE_COUNT * OVER_RETRIEVE_FACTOR
 
 
 class ConversationMessage(BaseModel):
@@ -48,9 +55,7 @@ class RerankerBaseRag(BaseRag):
       self,
       *,
       store: GoogleVectorStore,
-      llm: LLM,
-      retrieve_top_k: int = 10,
-      rerank_top_k: int = 5) -> None:
+      llm: LLM) -> None:
     super().__init__()
 
     index = VectorStoreIndex.from_vector_store(
@@ -58,11 +63,11 @@ class RerankerBaseRag(BaseRag):
         service_context=google_service_context)
     retriever = VectorIndexRetriever(
         index=index,
-        similarity_top_k=retrieve_top_k,
+        similarity_top_k=PASSAGE_COUNT * OVER_RETRIEVE_FACTOR,
     )
     reranker = LLMRerank(
-        choice_batch_size=5,
-        top_n=rerank_top_k,
+        top_n=PASSAGE_COUNT,
+        choice_batch_size=CHOICE_BATCH_SIZE,
         service_context=ServiceContext.from_defaults(llm=llm),
     )
     response_synthesizer = build_response_synthesizer()
