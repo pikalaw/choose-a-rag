@@ -6,7 +6,7 @@ import logging
 from pydantic import BaseModel
 from typing import Any, cast, List, Literal, Type
 from .base_rag import AttributedAnswer, BaseRag
-from .naive import GoogleRag, OpenaiRag
+from .naive import GoogleRag, OpenaiRag, PalmRag
 from .hyde import (
     HydeGpt4Rag,
     HydeGeminiProRag,
@@ -67,7 +67,8 @@ class UserMessage(BaseModel):
 
 StackId = Literal[
     "openai",
-    "google",
+    "google-aqa",
+    "palm",
     "hyde-gpt4",
     "hyde-gemini-pro",
     "hyde-gemini-ultra",
@@ -84,7 +85,8 @@ StackId = Literal[
 ]
 stack_types: dict[StackId, Type[BaseRag]] = {
   "openai": OpenaiRag,
-  "google": GoogleRag,
+  "google-aqa": GoogleRag,
+  "palm": PalmRag,
   "hyde-gpt4": HydeGpt4Rag,
   "hyde-gemini-pro": HydeGeminiProRag,
   "hyde-gemini-ultra": HydeGeminiUltraRag,

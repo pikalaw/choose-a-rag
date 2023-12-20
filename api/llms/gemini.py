@@ -1,4 +1,4 @@
-"""PaLM API."""
+"""Gemini API."""
 from typing import Any, Optional
 
 from llama_index.bridge.pydantic import Field, PrivateAttr
@@ -12,7 +12,7 @@ from llama_index.llms.base import (
 from llama_index.llms.custom import CustomLLM
 
 
-class PaLM(CustomLLM):
+class Gemini(CustomLLM):
     """Gemini LLM."""
 
     model_name: str = Field(description="The model to use.")
@@ -80,9 +80,9 @@ class PaLM(CustomLLM):
             Tuple[str, str]: Tuple of the predicted answer and the formatted prompt.
 
         """
-        from .genaix import generate_text
+        from .genaix import generate_content
 
-        completion = generate_text(
+        completion = generate_content(
             model=self.model_name,
             prompt=prompt,
             **kwargs,

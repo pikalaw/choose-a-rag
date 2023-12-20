@@ -6,7 +6,7 @@ from llama_index.response_synthesizers.google.generativeai import (
 from openai._types import FileContent
 from pydantic import BaseModel
 from typing import Iterable
-from .llms import PaLM
+from .llms import Gemini, PaLM
 
 
 TEMPERATURE = 0.2
@@ -73,10 +73,13 @@ def build_response_synthesizer() -> GoogleTextSynthesizer:
     )
 
 
-def build_gemini_pro() -> PaLM:
-    return PaLM(model_name="models/gemini-pro")
+def build_gemini_pro() -> Gemini:
+    return Gemini(model_name="models/gemini-pro")
     
 
-def build_gemini_ultra() -> PaLM:
-    return PaLM(model_name="models/gemini-ultra")
+def build_gemini_ultra() -> Gemini:
+    return Gemini(model_name="models/gemini-ultra")
     
+    
+def build_palm_2() -> PaLM:
+    return PaLM(model_name="models/text-bison-001")
