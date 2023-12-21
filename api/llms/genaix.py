@@ -27,6 +27,7 @@ def generate_text(model: str, prompt: str) -> str:
   response = service.generate_text(
       request=genai.GenerateTextRequest(
           model=model,
+          temperature=0.2,
           prompt=genai.TextPrompt(
               text=prompt)))
   candidates = list(response.candidates)
@@ -52,6 +53,9 @@ def generate_content(model: str, prompt: str) -> str:
                   ],
               )
           ],
+          generation_config=genai.GenerationConfig(
+              temperature=0.7,
+          ),
       )
   )
 

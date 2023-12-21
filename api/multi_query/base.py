@@ -61,6 +61,7 @@ _STEP_DECOMPOSE_QUERY_TRANSFORM_TMPL = (
     "On the other hand, if you do not have enough information to answer the "
     "original question, you must not provide 'None' as the answer. "
     "Instead, you must ask a new question!\n\n"
+    "Do NOT ask the same question twice!\n\n"
     "Some examples are given below: "
     "\n\n"
     "Question: How many Grand Slam titles does the winner of the 2020 Australian "
