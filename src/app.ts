@@ -70,7 +70,7 @@ async function ask({
         answer.citations.length > 0
       ) {
         chatBoxStack.addTheirMessages({
-          sender: 'Citations',
+          sender: 'Attribution',
           messages: dedup(answer.citations),
         });
       }
