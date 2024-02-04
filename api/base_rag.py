@@ -17,13 +17,10 @@ SAFETY_SETTING = [
         threshold=genai.SafetySetting.HarmBlockThreshold.BLOCK_NONE,
     )
     for category in [
-        genai.HarmCategory.HARM_CATEGORY_DEROGATORY,
-        genai.HarmCategory.HARM_CATEGORY_TOXICITY,
-        genai.HarmCategory.HARM_CATEGORY_VIOLENCE,
-        genai.HarmCategory.HARM_CATEGORY_SEXUAL,
-        genai.HarmCategory.HARM_CATEGORY_MEDICAL,
-        genai.HarmCategory.HARM_CATEGORY_DANGEROUS,
-        genai.HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+        genai.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        genai.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        genai.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        genai.HarmCategory.HARM_CATEGORY_HARASSMENT,
     ]
 ]
 # Maximum number of passage to use to answer questions.
@@ -39,30 +36,24 @@ class AttributedAnswer(BaseModel):
 class BaseRag(BaseModel, ABC):
     @classmethod
     @abstractmethod
-    async def get_default(cls) -> "BaseRag":
-        ...
+    async def get_default(cls) -> "BaseRag": ...
 
     @abstractmethod
-    async def list_files(self) -> Iterable[str]:
-        ...
+    async def list_files(self) -> Iterable[str]: ...
 
     @abstractmethod
     async def add_file(
         self, *, filename: str, content: FileContent, content_type: str
-    ) -> None:
-        ...
+    ) -> None: ...
 
     @abstractmethod
-    async def clear_files(self) -> None:
-        ...
+    async def clear_files(self) -> None: ...
 
     @abstractmethod
-    async def add_conversation(self, message: str) -> Iterable[AttributedAnswer]:
-        ...
+    async def add_conversation(self, message: str) -> Iterable[AttributedAnswer]: ...
 
     @abstractmethod
-    async def clear_conversation(self) -> None:
-        ...
+    async def clear_conversation(self) -> None: ...
 
 
 def build_response_synthesizer() -> GoogleTextSynthesizer:
@@ -75,11 +66,11 @@ def build_response_synthesizer() -> GoogleTextSynthesizer:
 
 def build_gemini_pro() -> Gemini:
     return Gemini(model_name="models/gemini-pro")
-    
+
 
 def build_gemini_ultra() -> Gemini:
     return Gemini(model_name="models/gemini-ultra")
-    
-    
+
+
 def build_palm_2() -> PaLM:
     return PaLM(model_name="models/text-bison-001")
